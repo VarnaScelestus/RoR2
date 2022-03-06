@@ -1,0 +1,10 @@
+{
+    "name": "Enhanced_OSP",
+    "version_number": "1.0.0",
+    "website_url": "",
+    "description": "Increase (or decrease) One Shot Protection invuln time.",
+	"dependencies": [
+		"bbepis-BepInExPack-5.4.9",
+		"tristanmcpherson-R2API-3.0.30"
+	]
+}

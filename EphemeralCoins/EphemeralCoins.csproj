@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <Version>1.2.1</Version>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="copy /Y &quot;$(TargetPath)&quot; &quot;C:\Users\rylun\AppData\Roaming\r2modmanPlus-local\RiskOfRain2\profiles\testing\BepInEx\plugins\VarnaScelestus-Ephemeral_Coins&quot;" />
+  </Target>
+
+  <ItemGroup>
+    <PackageReference Include="BepInEx.Core" Version="5.4.19" />
+    <PackageReference Include="UnityEngine.Modules" Version="2019.4.26" />
+    <PackageReference Include="RiskOfRain2.GameLibs" Version="1.2.1-r.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="MMHOOK_RoR2">
+      <HintPath>..\libs\MMHOOK_RoR2.dll</HintPath>
+    </Reference>
+    <Reference Include="ProperSave">
+      <HintPath>..\libs\ProperSave.dll</HintPath>
+    </Reference>
+    <Reference Include="R2API">
+      <HintPath>..\libs\R2API.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

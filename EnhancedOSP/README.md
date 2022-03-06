@@ -4,10 +4,12 @@ A simple mod that allows you to set the invincibility window granted by OSP. (de
 
 You can reach me (Varna) in the [RoR2 modding discord](https://discord.gg/5MbXZvd) with any feedback!
 
-## Todo
+## Todo (maybe)
 
 - Settings for changing the health threshold amount, as well as for the behavior with maxHP reduction from glass/tonic stacks.
 
 ## Changelog
+
+1.0.1 - Updated to work with SotV expansion. Removed R2API dependency.
 
 1.0.0 - Initial release

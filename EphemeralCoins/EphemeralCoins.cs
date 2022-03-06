@@ -11,7 +11,7 @@ using UnityEngine.Networking;
 
 namespace EphemeralCoins
 {
-    [BepInDependency("com.bepis.r2api")]
+    [BepInDependency(R2API.R2API.PluginGUID)]
     [NetworkCompatibility(CompatibilityLevel.NoNeedForSync, VersionStrictness.DifferentModVersionsAreOk)]
     [BepInDependency("com.KingEnderBrine.ProperSave", BepInDependency.DependencyFlags.SoftDependency)]
     [BepInPlugin("com.Varna.EphemeralCoins", "Ephemeral_Coins", "1.2.1")]

@@ -37,6 +37,8 @@ You can reach me (Varna) in the [RoR2 modding discord](https://discord.gg/5MbXZv
 
 ## Changelog
 
+1.2.2 - Internal cleanup; manifest updates
+
 1.2.1 - Updated to work with SotV expansion
 
 1.2.0 - Improved compatibility with [ProperSave](https://thunderstore.io/package/KingEnderBrine/ProperSave/).

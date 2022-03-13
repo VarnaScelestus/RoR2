@@ -11,7 +11,7 @@
   </PropertyGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="copy /Y &quot;$(TargetPath)&quot; &quot;C:\Users\rylun\AppData\Roaming\r2modmanPlus-local\RiskOfRain2\profiles\testing\BepInEx\plugins\VarnaScelestus-Enhanced_OSP&quot;" />
+    <Exec Command="copy /Y &quot;$(TargetPath)&quot; &quot;C:\Users\rylun\AppData\Roaming\r2modmanPlus-local\RiskOfRain2\profiles\DevTest\BepInEx\plugins\VarnaScelestus-Enhanced_OSP&quot;" />
   </Target>
 
   <ItemGroup>
@@ -23,9 +23,6 @@
   <ItemGroup>
     <Reference Include="MMHOOK_RoR2">
       <HintPath>..\libs\MMHOOK_RoR2.dll</HintPath>
-    </Reference>
-    <Reference Include="ProperSave">
-      <HintPath>..\libs\ProperSave.dll</HintPath>
     </Reference>
     <Reference Include="R2API">
       <HintPath>..\libs\R2API.dll</HintPath>

@@ -6,14 +6,13 @@ This mod aims to rebalance the Lunar Coin mechanic as a temporary currency, rath
 
 - All Lunar Coins are removed upon starting a run. The amount removed is displayed in chat. [^1]
 - Awards an amount of Lunar Coins to all players after removing all previous coins (default 0).
-- Lunar Coins drop rate changed to 5% / 0.95 falloff.
+- Lunar Coins drop rate changed to 5% / 0.9 falloff / 0.5% min chance.
 - Lunar Pods made free of cost.
 - Bazaar Between Time Lunar Buds cost lowered to 1 coin, and refresh when the Slab (Lunar Reroller) is used, even if already purchased.
 - Bazaar Between Time Lunar Seer cost lowered to 1 coin.
 - Bazaar Between Time Slab (Lunar Reroller) made free of cost. Can only be used once.
 - The chance for a Blue Orb to appear on stage start flattened to 37.5%, instead of decreasing for each visit to BBT.
 - Compatible with [ProperSave](https://thunderstore.io/package/KingEnderBrine/ProperSave/)!
-
 
 [^1]: For players who wish to restore their Lunar Coins, it is easily done through editing the "<coins>" tag in the save profile.
 
@@ -36,6 +35,8 @@ You can reach me (Varna) in the [RoR2 modding discord](https://discord.gg/5MbXZv
 [RoR2 modding discord](https://discord.gg/5MbXZvd) - For help in figuring out the Slab (Lunar Reroller)'s horrible, horrible internal structure, and just being awesome in general!
 
 ## Changelog
+
+1.3.0 - Added config setting for minimum drop chance.
 
 1.2.2 - Internal cleanup; manifest updates
 

@@ -1,5 +1,6 @@
 ﻿using BepInEx;
 using BepInEx.Configuration;
+using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using R2API.Utils;
 using RoR2;
@@ -11,7 +12,7 @@ using UnityEngine.Networking;
 
 namespace EphemeralCoins
 {
-    [BepInDependency(R2API.R2API.PluginGUID)]
+    [BepInDependency(R2API.R2API.PluginGUID, R2API.R2API.PluginVersion)]
     [NetworkCompatibility(CompatibilityLevel.NoNeedForSync, VersionStrictness.DifferentModVersionsAreOk)]
     [BepInDependency("com.KingEnderBrine.ProperSave", BepInDependency.DependencyFlags.SoftDependency)]
     [BepInPlugin("com.Varna.EphemeralCoins", "Ephemeral_Coins", "1.2.1")]
@@ -21,6 +22,7 @@ namespace EphemeralCoins
         private static ConfigEntry<int> StartingCoins;
         private static ConfigEntry<float> DropChance;
         private static ConfigEntry<float> DropMulti;
+        private static ConfigEntry<float> DropMin;
         private static ConfigEntry<int> PodCost;
         private static ConfigEntry<int> ShopCost;
         private static ConfigEntry<bool> ShopRefresh;
@@ -34,19 +36,20 @@ namespace EphemeralCoins
 
         public void Awake()
         {
-            ResetCoins = Config.Bind("", "ResetCoins", true, new ConfigDescription("Remove all Lunar Coins on run start?"));
-            StartingCoins = Config.Bind("", "StartingCoins", 0, new ConfigDescription("The number of Lunar Coins each player starts with. (only if ResetCoins is true)"));
-            DropChance = Config.Bind("", "DropChance", 5.0f, new ConfigDescription("The initial %chance for enemies to drop coins. Vanilla is 0.5%"));
-            DropMulti = Config.Bind("", "DropMulti", 0.90f, new ConfigDescription("The multiplier applied to the drop chance after a coin has dropped. Vanilla is 0.5 (50%)"));
-            PodCost = Config.Bind("", "PodCost", 0, new ConfigDescription("The cost of Lunar Pods. Vanilla is 1"));
-            ShopCost = Config.Bind("", "ShopCost", 1, new ConfigDescription("The cost of Lunar Buds in BTB. Vanilla is 2"));
-            ShopRefresh = Config.Bind("", "ShopRefresh", true, new ConfigDescription("Do empty Lunar Buds in BTB refresh when the Slab (reroller) is used? Vanilla is false"));
-            SeerCost = Config.Bind("", "SeerCost", 1, new ConfigDescription("The cost of Lunar Seers in BTB. Vanilla is 3"));
-            RerollCost = Config.Bind("", "RerollCost", 0, new ConfigDescription("The initial cost of the Slab (reroller) in BTB. Vanilla is 1"));
-            RerollAmount = Config.Bind("", "RerollAmount", 1, new ConfigDescription("How many times can the Slab (reroller) in BTB be used? Enter 0 for infinite (vanilla)."));
-            RerollScale = Config.Bind("", "RerollScale", 2, new ConfigDescription("The cost multiplier per use of the Slab (reroller) in BTB. Vanilla is 2"));
-            PortalChance = Config.Bind("", "PortalChance", 0.375f, new ConfigDescription("The chance of a Blue Orb appearing on stage start. Vanilla is 0.375 (37.5%)"));
-            PortalScale = Config.Bind("", "PortalScale", false, new ConfigDescription("Scale down the chance of a Blue Orb appearing for each time BTB has been visited? Vanilla behavior is true"));
+            ResetCoins = Config.Bind("1. Start of Run", "ResetCoins", true, new ConfigDescription("Remove all Lunar Coins on run start?"));
+            StartingCoins = Config.Bind("1. Start of Run", "StartingCoins", 0, new ConfigDescription("The number of Lunar Coins each player starts with. (only if ResetCoins is true)"));
+            DropChance = Config.Bind("2. Enemy and Stage", "DropChance", 5.0f, new ConfigDescription("The initial %chance for enemies to drop coins. Vanilla is 0.5%"));
+            DropMulti = Config.Bind("2. Enemy and Stage", "DropMulti", 0.90f, new ConfigDescription("The multiplier applied to the drop chance after a coin has dropped. Vanilla is 0.5 (50%)"));
+            DropMin = Config.Bind("2. Enemy and Stage", "DropMin", 0.5f, new ConfigDescription("The lowest %chance for enemies to drop coins after DropMulti is applied. Vanilla has no lower limit"));
+            PodCost = Config.Bind("2. Enemy and Stage", "PodCost", 0, new ConfigDescription("The cost of Lunar Pods. Vanilla is 1"));
+            ShopCost = Config.Bind("3. Bazaar Between Time", "ShopCost", 1, new ConfigDescription("The cost of Lunar Buds in BTB. Vanilla is 2"));
+            ShopRefresh = Config.Bind("3. Bazaar Between Time", "ShopRefresh", true, new ConfigDescription("Do empty Lunar Buds in BTB refresh when the Slab (reroller) is used? Vanilla is false"));
+            SeerCost = Config.Bind("3. Bazaar Between Time", "SeerCost", 1, new ConfigDescription("The cost of Lunar Seers in BTB. Vanilla is 3"));
+            RerollCost = Config.Bind("3. Bazaar Between Time", "RerollCost", 0, new ConfigDescription("The initial cost of the Slab (reroller) in BTB. Vanilla is 1"));
+            RerollAmount = Config.Bind("3. Bazaar Between Time", "RerollAmount", 1, new ConfigDescription("How many times can the Slab (reroller) in BTB be used? Enter 0 for infinite (vanilla)."));
+            RerollScale = Config.Bind("3. Bazaar Between Time", "RerollScale", 2, new ConfigDescription("The cost multiplier per use of the Slab (reroller) in BTB. Vanilla is 2"));
+            PortalChance = Config.Bind("2. Enemy and Stage", "PortalChance", 0.375f, new ConfigDescription("The chance of a Blue Orb appearing on stage start. Vanilla is 0.375 (37.5%)"));
+            PortalScale = Config.Bind("2. Enemy and Stage", "PortalScale", false, new ConfigDescription("Scale down the chance of a Blue Orb appearing for each time BTB has been visited? Vanilla behavior is true"));
 
             numTimesRerolled = 0;
 
@@ -159,6 +162,11 @@ namespace EphemeralCoins
                 );
             c.Index += 2;
             c.Next.Operand = DropMulti.Value;
+            c.Index += 2;
+            c.EmitDelegate<Func<float, float>>((originalChance) => {
+                //Debug.Log($"{originalChance} vs {DropMin.Value}");
+                return Math.Max(originalChance, DropMin.Value);
+            });
         }
 
         public IEnumerator DelayedAutomaticCoinRemovalLocal()

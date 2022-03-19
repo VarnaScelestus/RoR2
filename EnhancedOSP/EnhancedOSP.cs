@@ -68,7 +68,8 @@ namespace EnhancedOSP
                     );
                 c.Index++;
                 c.Remove();
-                c.EmitDelegate<Func<RoR2.HealthComponent, float>>((hc) => { return shieldAffectsOSP.Value || hc.body.inventory.GetItemCount(RoR2Content.Items.ShieldOnly) > 0 || hc.body.HasBuff(RoR2Content.Buffs.AffixLunar) ? hc.fullCombinedHealth : hc.fullHealth; });
+                c.EmitDelegate<Func<RoR2.HealthComponent, float>>((hc) => { return (shieldAffectsOSP.Value || hc.body.inventory.GetItemCount(RoR2Content.Items.ShieldOnly) > 0 || hc.body.HasBuff(RoR2Content.Buffs.AffixLunar)) ? hc.fullCombinedHealth : hc.fullHealth; });
+                //c.EmitDelegate<Func<RoR2.HealthComponent, float>>((hc) => { return hc.fullHealth; });
             };
             Logger.LogDebug("Shield behavior successful");
         }

@@ -1,6 +1,6 @@
 {
     "name": "Ephemeral_Coins",
-    "version_number": "1.3.0",
+    "version_number": "1.4.0",
     "website_url": "https://github.com/VarnaScelestus/RoR2",
     "description": "Lunar Coins become a per-run currency, with changes to Lunar Pods, BBT, and more.",
     "dependencies": [

@@ -8,6 +8,7 @@ This mod aims to rebalance the Lunar Coin mechanic as a temporary currency, rath
 - Awards an amount of Lunar Coins to all players after removing all previous coins (default 0).
 - Lunar Coins drop rate changed to 5% / 0.9 falloff / 0.5% min chance.
 - Lunar Pods made free of cost.
+- The Frog made free of cost, and you only have to pet it once.
 - Bazaar Between Time Lunar Buds cost lowered to 1 coin, and refresh when the Slab (Lunar Reroller) is used, even if already purchased.
 - Bazaar Between Time Lunar Seer cost lowered to 1 coin.
 - Bazaar Between Time Slab (Lunar Reroller) made free of cost. Can only be used once.
@@ -24,9 +25,9 @@ You can reach me (Varna) in the [RoR2 modding discord](https://discord.gg/5MbXZv
 
 ## Todo (maybe)
 
-- Settings for Newt Altars, possibly a rework to their behavior
+- Refactoring old hook-based code with prettier prefab-modification code.
+- Add Newt Altars to the controllable settings.
 - Brainstorming on what to do with Lunar Coins received from obliterating/beating the game.
-- Automatic lunar coin pickup.
 
 ## Credits
 
@@ -35,6 +36,8 @@ You can reach me (Varna) in the [RoR2 modding discord](https://discord.gg/5MbXZv
 [RoR2 modding discord](https://discord.gg/5MbXZvd) - For help in figuring out the Slab (Lunar Reroller)'s horrible, horrible internal structure, and just being awesome in general!
 
 ## Changelog
+
+1.4.0 - Added THE FROG.
 
 1.3.0 - Added config setting for minimum drop chance.
 

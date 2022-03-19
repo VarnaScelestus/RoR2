@@ -11,21 +11,18 @@
   </PropertyGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="copy /Y &quot;$(TargetPath)&quot; &quot;C:\Users\rylun\AppData\Roaming\r2modmanPlus-local\RiskOfRain2\profiles\DevTest\BepInEx\plugins\VarnaScelestus-Enhanced_OSP&quot;" />
+    <Exec Command="if &quot;$(Username)&quot; == &quot;Varna&quot; mkdir &quot;C:\Users\rylun\AppData\Roaming\r2modmanPlus-local\RiskOfRain2\profiles\DevTest\BepInEx\plugins\DEVTEST&quot;&#xD;&#xA;if &quot;$(Username)&quot; == &quot;Varna&quot; copy /Y &quot;$(TargetPath)&quot; &quot;C:\Users\rylun\AppData\Roaming\r2modmanPlus-local\RiskOfRain2\profiles\DevTest\BepInEx\plugins\DEVTEST&quot;" />
   </Target>
 
   <ItemGroup>
     <PackageReference Include="BepInEx.Core" Version="5.4.19" />
+    <PackageReference Include="RiskOfRain2.GameLibs" Version="1.2.2-r.0" />
     <PackageReference Include="UnityEngine.Modules" Version="2019.4.26" />
-    <PackageReference Include="RiskOfRain2.GameLibs" Version="1.2.1-r.0" />
   </ItemGroup>
 
   <ItemGroup>
     <Reference Include="MMHOOK_RoR2">
       <HintPath>..\libs\MMHOOK_RoR2.dll</HintPath>
-    </Reference>
-    <Reference Include="R2API">
-      <HintPath>..\libs\R2API.dll</HintPath>
     </Reference>
   </ItemGroup>
 

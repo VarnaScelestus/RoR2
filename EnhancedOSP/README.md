@@ -6,6 +6,7 @@ A simple mod that allows you to:
 - Set the threshold of missing HP required before a player loses OSP. (default is 0.1, or 10% missing HP, same as Vanilla)
 - Set whether sources of maxHP reduction such as Shaped Glass negatively impact OSP. (default is false, Vanilla is true)
 - Set whether sources of Shield such as Personal Shield Generator or Overloading Elite affix negatively impact OSP. Note: Trancendence and Perfected Elite Affix behavior unaffected to avoid godmode issues. (default is false, Vanilla is true)
+- Set whether or not sources of MaxHP reduction (Shaped Glass, etc) are represented on the HUD via a pointless 'glass' effect that takes up space and makes the bar harder to read during gameplay. (default is false, Vanilla is true)
 
 You can reach me (Varna) in the [RoR2 modding discord](https://discord.gg/5MbXZvd) with any feedback!
 
@@ -16,6 +17,8 @@ You can reach me (Varna) in the [RoR2 modding discord](https://discord.gg/5MbXZv
 [RoR2 modding discord](https://discord.gg/5MbXZvd) - Because IL is never without massive headaches.
 
 ## Changelog
+
+1.3.0 - Fixed the HUD not updating the OSP fraction properly with the new settings, and added a setting to disable maxHP reduction's vanilla HUD "improvements".
 
 1.2.0 - Added setting to control whether Shield affects OSP.
 

@@ -15,6 +15,15 @@
   </Target>
 
   <ItemGroup>
+    <Compile Remove="RoR2.CharacterBody.cs" />
+    <Compile Remove="RoR2.HealthComponent.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="RoR2.HealthComponent.il" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="BepInEx.Core" Version="5.4.19" />
     <PackageReference Include="RiskOfRain2.GameLibs" Version="1.2.2-r.0" />
     <PackageReference Include="UnityEngine.Modules" Version="2019.4.26" />

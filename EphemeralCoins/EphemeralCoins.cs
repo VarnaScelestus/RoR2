@@ -2,6 +2,8 @@
 using R2API.Utils;
 using RoR2;
 using System.Collections;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 
@@ -10,12 +12,21 @@ namespace EphemeralCoins
     [BepInDependency(R2API.R2API.PluginGUID, R2API.R2API.PluginVersion)]
     [NetworkCompatibility(CompatibilityLevel.EveryoneMustHaveMod, VersionStrictness.EveryoneNeedSameModVersion)]
     [BepInDependency("com.KingEnderBrine.ProperSave", BepInDependency.DependencyFlags.SoftDependency)]
-    [BepInDependency("com.rune580.riskofoptions")]
-    [BepInPlugin("com.Varna.EphemeralCoins", "Ephemeral_Coins", "2.0.0")]
+    [BepInDependency("com.rune580.riskofoptions", BepInDependency.DependencyFlags.SoftDependency)]
+    [BepInPlugin("com.Varna.EphemeralCoins", "Ephemeral_Coins", "2.1.0")]
     public class EphemeralCoins : BaseUnityPlugin
     {
         public int numTimesRerolled;
-        public int ephemeralCoinCount;
+
+        public class CoinStorage
+        {
+            public NetworkUser user;
+            public uint ephemeralCoinCount;
+        }
+        public List<CoinStorage> coinCounts = new List<CoinStorage>();
+
+        //public int ephemeralCoinCount;
+
         public static PluginInfo PInfo { get; private set; }
         public static EphemeralCoins instance;
 
@@ -26,7 +37,7 @@ namespace EphemeralCoins
 
             //internal counters
             numTimesRerolled = 0;
-            ephemeralCoinCount = 0;
+            //ephemeralCoinCount = 0;
 
             //cost override
             RoR2Application.onLoad += AddCostType;
@@ -37,6 +48,83 @@ namespace EphemeralCoins
 
             //Utterly broken, fix later
             //if (ProperSaveCompatibility.enabled) ProperSaveSetup();
+        }
+
+        ///
+        /// Based on the PlayerStorage system used in https://github.com/WondaMegapon/Refightilization/blob/master/Refightilization/Refightilization.cs
+        ///
+        public void SetupCoinStorage(List<CoinStorage> coinStorage, bool NewRun = true)
+        {
+            if (NewRun) coinStorage.Clear();
+            foreach (PlayerCharacterMasterController playerCharacterMaster in PlayerCharacterMasterController.instances)
+            {
+                // Skipping over Disconnected Players.
+                if (coinStorage != null && playerCharacterMaster.networkUser == null)
+                {
+                    Logger.LogInfo("A player disconnected! Skipping over what remains of them...");
+                    continue;
+                }
+
+                // If this is ran mid-stage, just skip over existing players and add anybody who joined.
+                if (!NewRun && coinStorage != null)
+                {
+                    // Skipping over players that are already in the game.
+                    bool flag = false;
+                    foreach (CoinStorage player in coinStorage)
+                    {
+                        if (player.user == playerCharacterMaster.networkUser)
+                        {
+                            flag = true;
+                            break;
+                        }
+                    }
+                    if (flag) continue;
+                }
+                CoinStorage newPlayer = new CoinStorage();
+                if (playerCharacterMaster.networkUser) newPlayer.user = playerCharacterMaster.networkUser;
+                newPlayer.ephemeralCoinCount = 0;
+                coinStorage.Add(newPlayer);
+                Logger.LogInfo(newPlayer.user.userName + " added to CoinStorage!");
+            }
+            Logger.LogInfo("Setting up CoinStorage finished.");
+        }
+
+        public void giveCoinsToUser(NetworkUser user, uint count)
+        {
+            foreach (CoinStorage player in coinCounts)
+            {
+                if (player.user == user)
+                {
+                    player.ephemeralCoinCount += count;
+                    Logger.LogInfo("giveCoinsToUser: " + user.userName + " " + count);
+                }
+            }
+        }
+
+        public void takeCoinsFromUser(NetworkUser user, uint count)
+        {
+            foreach (CoinStorage player in coinCounts)
+            {
+                if (player.user == user)
+                {
+                    player.ephemeralCoinCount -= count;
+                    Logger.LogInfo("takeCoinsFromUser: " + user.userName + " " + count);
+                }
+            }
+        }
+
+        public uint getCoinsFromUser(NetworkUser user)
+        {
+            foreach (CoinStorage player in coinCounts)
+            {
+                if (player.user == user)
+                {
+                    //Spams the console due to HUD hook, only used for debugging.
+                    //Logger.LogInfo("getCoinsFromUser: " + user.userName + player.ephemeralCoinCount);
+                    return player.ephemeralCoinCount;
+                }
+            }
+            return 0;
         }
 
         ///
@@ -51,18 +139,24 @@ namespace EphemeralCoins
                 darkenWorldStyledCostString = true,
                 isAffordable = delegate (CostTypeDef costTypeDef, CostTypeDef.IsAffordableContext context)
                 {
-                    if (RunArtifactManager.instance.IsArtifactEnabled(Assets.NewMoonArtifact)) { return ephemeralCoinCount >= context.cost; }
                     NetworkUser networkUser2 = Util.LookUpBodyNetworkUser(context.activator.gameObject);
+                    if (RunArtifactManager.instance.IsArtifactEnabled(Assets.NewMoonArtifact)) {
+                        foreach (CoinStorage player in coinCounts)
+                        {
+                            if (player.user == networkUser2)
+                            {
+                                return player.ephemeralCoinCount >= context.cost;
+                            }
+                        }
+                    }
                     return (bool)networkUser2 && networkUser2.lunarCoins >= context.cost;
                 },
-                //Overriding payCost might be unnecessary due to our hooks, but just in case.
                 payCost = delegate (CostTypeDef costTypeDef, CostTypeDef.PayCostContext context)
                 {
                     NetworkUser networkUser = Util.LookUpBodyNetworkUser(context.activator.gameObject);
                     if ((bool)networkUser)
                     {
-                        if (RunArtifactManager.instance.IsArtifactEnabled(Assets.NewMoonArtifact)) { ephemeralCoinCount -= context.cost; }
-                        else { networkUser.DeductLunarCoins((uint)context.cost); }
+                        networkUser.DeductLunarCoins((uint)context.cost);
                         RoR2.Items.MultiShopCardUtils.OnNonMoneyPurchase(context);
                     }
                 },
@@ -160,25 +254,22 @@ namespace EphemeralCoins
             }
         }
 
-        //TODO: Why the fuck is this broken
-        /*
         [MethodImpl(MethodImplOptions.NoInlining)]
         public void ProperSaveSetup()
         {
-            ProperSave.SaveFile.OnGatgherSaveData += (dict) =>
+            ProperSave.SaveFile.OnGatherSaveData += (dict) =>
             {
                 if (dict.ContainsKey("ephemeralCoinCount"))
-                    dict["ephemeralCoinCount"] = ephemeralCoinCount;
+                    dict["ephemeralCoinCount"] = coinCounts;
                 else
-                    dict.Add("ephemeralCoinCount", ephemeralCoinCount);
+                    dict.Add("ephemeralCoinCount", coinCounts);
             };
 
             ProperSave.Loading.OnLoadingEnded += (save) =>
             {
-                ephemeralCoinCount = save.GetModdedData<int>("ephemeralCoinCount");
+                coinCounts = save.GetModdedData<List<CoinStorage>>("ephemeralCoinCount");
             };
         }
-        */
 
         ///
         /// Required for BTB to change the costs of the pre-loaded prefab instances.
@@ -209,11 +300,6 @@ namespace EphemeralCoins
         {
             yield return new WaitForSeconds(1f);
             Chat.SendBroadcastChat(new Chat.SimpleChatMessage { baseToken = "<color=#beeca1><size=15px>A new moon rises...</size></color>" });
-            for (int i = 0; i < PlayerCharacterMasterController.instances.Count; i++)
-            {
-                PlayerCharacterMasterController.instances[i].networkUser.DeductLunarCoins((uint)ephemeralCoinCount);
-            }
-
             yield return new WaitForSeconds(3f);
             if (BepConfig.StartingCoins.Value > 0)
             {

@@ -27,7 +27,7 @@ namespace EphemeralCoins
 		{
 			get
 			{
-				return System.IO.Path.Combine(EphemeralCoins.PInfo.Location.Substring(0, EphemeralCoins.PInfo.Location.Length - 18), assetBundleFolder, bundleName);
+				return System.IO.Path.Combine(System.IO.Path.GetDirectoryName(EphemeralCoins.PInfo.Location), assetBundleFolder, bundleName);
 			}
 		}
 

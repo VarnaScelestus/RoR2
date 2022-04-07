@@ -1,4 +1,5 @@
-﻿using MonoMod.Cil;
+﻿using BepInEx;
+using MonoMod.Cil;
 using R2API.Utils;
 using RoR2;
 using System;
@@ -16,6 +17,8 @@ namespace EphemeralCoins
 
             //Coin counter
             On.RoR2.UI.HUD.Update += HUD_Update;
+            On.RoR2.Run.OnUserAdded += Run_OnUserAdded;
+            //On.RoR2.Run.OnUserRemoved += Run_OnUserRemoved;
 
             //Cost functions
             On.RoR2.NetworkUser.RpcAwardLunarCoins += NetworkUser_RpcAwardLunarCoins;
@@ -57,7 +60,11 @@ namespace EphemeralCoins
                 bool check;
                 if (ProperSaveCompatibility.enabled) { check = ProperSaveCompatibility.IsRunNew(); }
                 else { check = Run.instance.stageClearCount == 0 ? true : false; }
-                if (check) EphemeralCoins.instance.StartCoroutine(EphemeralCoins.instance.DelayedStartingLunarCoins());
+                if (check)
+                {
+                    EphemeralCoins.instance.SetupCoinStorage(EphemeralCoins.instance.coinCounts);
+                    EphemeralCoins.instance.StartCoroutine(EphemeralCoins.instance.DelayedStartingLunarCoins());
+                }
             }
         }
 
@@ -66,7 +73,7 @@ namespace EphemeralCoins
             orig(self);
             if (RunArtifactManager.instance && RunArtifactManager.instance.IsArtifactEnabled(Assets.NewMoonArtifact))
             {
-                self.lunarCoinText.targetValue = EphemeralCoins.instance.ephemeralCoinCount;
+                self.lunarCoinText.targetValue = (int)EphemeralCoins.instance.getCoinsFromUser(self._localUserViewer.currentNetworkUser);
                 self.lunarCoinContainer.transform.Find("LunarCoinSign").GetComponent<RoR2.UI.HGTextMeshProUGUI>().text = "<sprite name=\"LunarCoin\" color=#adf2fa>";
             }
         }
@@ -75,7 +82,7 @@ namespace EphemeralCoins
         {
             if (RunArtifactManager.instance && RunArtifactManager.instance.IsArtifactEnabled(Assets.NewMoonArtifact))
             {
-                EphemeralCoins.instance.ephemeralCoinCount += (int)count;
+                EphemeralCoins.instance.giveCoinsToUser(self, count);
                 self.SyncLunarCoinsToServer();
             }
             else orig(self, count);
@@ -85,7 +92,7 @@ namespace EphemeralCoins
         {
             if (RunArtifactManager.instance && RunArtifactManager.instance.IsArtifactEnabled(Assets.NewMoonArtifact))
             {
-                EphemeralCoins.instance.ephemeralCoinCount -= (int)count;
+                EphemeralCoins.instance.takeCoinsFromUser(self, count);
                 self.SyncLunarCoinsToServer();
             }
             else orig(self, count);
@@ -95,7 +102,7 @@ namespace EphemeralCoins
         {
             if (RunArtifactManager.instance && RunArtifactManager.instance.IsArtifactEnabled(Assets.NewMoonArtifact))
             {
-                self.CallCmdSetNetLunarCoins((uint)EphemeralCoins.instance.ephemeralCoinCount);
+                self.CallCmdSetNetLunarCoins((uint)EphemeralCoins.instance.getCoinsFromUser(self));
             }
             else orig(self);
         }
@@ -184,6 +191,33 @@ namespace EphemeralCoins
             orig(self);
             if (BepConfig.ShopRefresh.Value && self.name.StartsWith("LunarShop")) { self.GetComponent<PurchaseInteraction>().SetAvailable(true); }
         }
+        #endregion
+
+        #region CoinStorage
+        private static void Run_OnUserAdded(On.RoR2.Run.orig_OnUserAdded orig, Run self, NetworkUser user)
+        {
+            orig(self, user);
+            if (Run.instance.time > 1f)
+                EphemeralCoins.instance.SetupCoinStorage(EphemeralCoins.instance.coinCounts, false);
+        }
+
+        /*private static void Run_OnUserRemoved(On.RoR2.Run.orig_OnUserRemoved orig, Run self, NetworkUser user)
+        {
+            orig(self, user);
+            if (Run.instance.time > 1f)
+            {
+                EphemeralCoins.CoinStorage target = null;
+                foreach (EphemeralCoins.CoinStorage player in EphemeralCoins.instance.coinCounts)
+                {
+                    if (player.user.userName == user.userName)
+                    {
+                        target = player;
+                        break;
+                    }
+                }
+                EphemeralCoins.instance.coinCounts.Remove(target);
+            }
+        }*/
         #endregion
     }
 }

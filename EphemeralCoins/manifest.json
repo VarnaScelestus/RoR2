@@ -1,6 +1,6 @@
 {
     "name": "Ephemeral_Coins",
-    "version_number": "2.0.0",
+    "version_number": "2.1.0",
     "website_url": "https://github.com/VarnaScelestus/RoR2",
     "description": "Lunar Coins become a per-run currency via artifact. Seperate configs for drop chance, BTB costs, etc.",
     "dependencies": [

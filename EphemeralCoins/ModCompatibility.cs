@@ -23,4 +23,21 @@ namespace EphemeralCoins
             return !ProperSave.Loading.IsLoading;
         }
     }
+
+    public static class RiskOfOptionsCompatibility
+    {
+        private static bool? _enabled;
+
+        public static bool enabled
+        {
+            get
+            {
+                if (_enabled == null)
+                {
+                    _enabled = BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("com.rune580.riskofoptions");
+                }
+                return (bool)_enabled;
+            }
+        }
+    }
 }

@@ -19,11 +19,12 @@ Provides settings to control various aspects relating to Lunar Coins, including 
 
 ## Known Issues
 
-- None, but very little multiplayer testing has been done. Please report any bugs on [Github](https://github.com/VarnaScelestus/RoR2).
+- Lunar Reroller won't let you reroll if you've already bought the entire store, even if the config is set to refresh the lineup.
+- Very little multiplayer testing has been done. Please report any bugs on [Github](https://github.com/VarnaScelestus/RoR2).
 
 ## Todo
 
-- Fix compatibility with [ProperSave](https://thunderstore.io/package/KingEnderBrine/ProperSave/) which was broken by 2.0.0's codebase refactor.
+- [ProperSave](https://thunderstore.io/package/KingEnderBrine/ProperSave/) compatibility is iffy and needs more testing.
 
 ## Credits
 
@@ -32,6 +33,10 @@ Provides settings to control various aspects relating to Lunar Coins, including 
 [RoR2 modding discord](https://discord.gg/5MbXZvd) - For help in figuring out the Slab (Lunar Reroller)'s horrible, horrible internal structure, and just being awesome in general!
 
 ## Changelog
+
+2.1.0 - Reworked how coins are tracked internally so that each player has their own count (oversight from 2.0.0 that was causing major bugs). Fixed compatibility with [ProperSave](https://thunderstore.io/package/KingEnderBrine/ProperSave/) (I hope) and some errors in how [Risk of Options](https://thunderstore.io/package/Rune580/Risk_Of_Options/) integration was handled.
+
+2.0.1 - Fixed thunderstore issue preventing the assetbundle from being loaded.
 
 2.0.0 - Major codebase refactor. Added Artifact of the New Moon, allowing you to toggle whether to use temporary coins on a per run basis without affecting your save file. Added [Risk of Options](https://thunderstore.io/package/Rune580/Risk_Of_Options/) integration.
 

@@ -1,256 +1,229 @@
 ﻿using BepInEx;
-using BepInEx.Configuration;
-using MonoMod.Cil;
 using R2API.Utils;
 using RoR2;
-using System;
 using System.Collections;
-using System.Reflection;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
-using UnityEngine.Networking;
 
 namespace EphemeralCoins
 {
-    [BepInDependency(R2API.R2API.PluginGUID, "4.1.1")]
-    [NetworkCompatibility(CompatibilityLevel.NoNeedForSync, VersionStrictness.DifferentModVersionsAreOk)]
+    [BepInDependency(R2API.R2API.PluginGUID, R2API.R2API.PluginVersion)]
+    [NetworkCompatibility(CompatibilityLevel.EveryoneMustHaveMod, VersionStrictness.EveryoneNeedSameModVersion)]
     [BepInDependency("com.KingEnderBrine.ProperSave", BepInDependency.DependencyFlags.SoftDependency)]
-    [BepInPlugin("com.Varna.EphemeralCoins", "Ephemeral_Coins", "1.4.0")]
+    [BepInDependency("com.rune580.riskofoptions")]
+    [BepInPlugin("com.Varna.EphemeralCoins", "Ephemeral_Coins", "2.0.0")]
     public class EphemeralCoins : BaseUnityPlugin
     {
-        private static ConfigEntry<bool> ResetCoins;
-        private static ConfigEntry<int> StartingCoins;
+        public int numTimesRerolled;
+        public int ephemeralCoinCount;
+        public static PluginInfo PInfo { get; private set; }
+        public static EphemeralCoins instance;
 
-        private static ConfigEntry<float> DropChance;
-        private static ConfigEntry<float> DropMulti;
-        private static ConfigEntry<float> DropMin;
-        private static ConfigEntry<int> PodCost;
-        private static ConfigEntry<float> PortalChance;
-        private static ConfigEntry<bool> PortalScale;
-        private static ConfigEntry<int> FrogCost;
-        private static ConfigEntry<int> FrogPets;
-
-        private static ConfigEntry<int> ShopCost;
-        private static ConfigEntry<bool> ShopRefresh;
-        private static ConfigEntry<int> SeerCost;
-        private static ConfigEntry<int> RerollCost;
-        private static ConfigEntry<int> RerollAmount;
-        private static ConfigEntry<int> RerollScale;
-
-        private int numTimesRerolled;
-
-        public void Awake()
+        public void Awake() //might have to change to Start()?
         {
-            ResetCoins = Config.Bind("1. Start of Run", "ResetCoins", true, new ConfigDescription("Remove all Lunar Coins on run start?"));
-            StartingCoins = Config.Bind("1. Start of Run", "StartingCoins", 0, new ConfigDescription("The number of Lunar Coins each player starts with. (only if ResetCoins is true)"));
+            PInfo = Info;
+            instance = this;
 
-            DropChance = Config.Bind("2. Enemy and Stage", "DropChance", 5.0f, new ConfigDescription("The initial %chance for enemies to drop coins. Vanilla is 0.5%"));
-            DropMulti = Config.Bind("2. Enemy and Stage", "DropMulti", 0.90f, new ConfigDescription("The multiplier applied to the drop chance after a coin has dropped. Vanilla is 0.5 (50%)"));
-            DropMin = Config.Bind("2. Enemy and Stage", "DropMin", 0.5f, new ConfigDescription("The lowest %chance for enemies to drop coins after DropMulti is applied. Vanilla has no lower limit"));
-            PodCost = Config.Bind("2. Enemy and Stage", "PodCost", 0, new ConfigDescription("The cost of Lunar Pods. Vanilla is 1"));
-            PortalChance = Config.Bind("2. Enemy and Stage", "PortalChance", 0.375f, new ConfigDescription("The chance of a Blue Orb appearing on stage start. Vanilla is 0.375 (37.5%)"));
-            PortalScale = Config.Bind("2. Enemy and Stage", "PortalScale", false, new ConfigDescription("Scale down the chance of a Blue Orb appearing for each time BTB has been visited? Vanilla behavior is true"));
-            FrogCost = Config.Bind("2. Enemy and Stage", "FrogCost", 0, new ConfigDescription("The cost of the Frog. Vanilla is 1"));
-            FrogPets = Config.Bind("2. Enemy and Stage", "FrogPets", 1, new ConfigDescription("The number of times you have to interact with the Frog before something happens. Vanilla is 10"));
-
-            ShopCost = Config.Bind("3. Bazaar Between Time", "ShopCost", 1, new ConfigDescription("The cost of Lunar Buds in BTB. Vanilla is 2"));
-            ShopRefresh = Config.Bind("3. Bazaar Between Time", "ShopRefresh", true, new ConfigDescription("Do empty Lunar Buds in BTB refresh when the Slab (reroller) is used? Vanilla is false"));
-            SeerCost = Config.Bind("3. Bazaar Between Time", "SeerCost", 1, new ConfigDescription("The cost of Lunar Seers in BTB. Vanilla is 3"));
-            RerollCost = Config.Bind("3. Bazaar Between Time", "RerollCost", 0, new ConfigDescription("The initial cost of the Slab (reroller) in BTB. Vanilla is 1"));
-            RerollAmount = Config.Bind("3. Bazaar Between Time", "RerollAmount", 1, new ConfigDescription("How many times can the Slab (reroller) in BTB be used? Enter 0 for infinite (vanilla)."));
-            RerollScale = Config.Bind("3. Bazaar Between Time", "RerollScale", 2, new ConfigDescription("The cost multiplier per use of the Slab (reroller) in BTB. Vanilla is 2"));
-
+            //internal counters
             numTimesRerolled = 0;
+            ephemeralCoinCount = 0;
 
-            On.RoR2.Run.Start += Run_Start;
-            BindingFlags allFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance | BindingFlags.DeclaredOnly;
-            var initDelegate = typeof(PlayerCharacterMasterController).GetNestedTypes(allFlags)[0].GetMethodCached(name: "<Init>b__72_0");
-            MonoMod.RuntimeDetour.HookGen.HookEndpointManager.Modify(initDelegate, (Action<ILContext>)CoinDropHook);
-            On.RoR2.PlayerCharacterMasterController.Awake += PlayerCharacterMasterController_Awake;
-            On.RoR2.SceneDirector.Start += SceneDirector_Start;
-            On.RoR2.BazaarController.SetUpSeerStations += BazaarController_SetUpSeerStations;
-            On.RoR2.PurchaseInteraction.SetAvailable += PurchaseInteraction_SetAvailable;
-            On.RoR2.PurchaseInteraction.ScaleCost += PurchaseInteraction_ScaleCost;
-            On.RoR2.ShopTerminalBehavior.GenerateNewPickupServer += ShopTerminalBehavior_GenerateNewPickupServer;
-            On.RoR2.TeleporterInteraction.Start += TeleporterInteraction_Start;
+            //cost override
+            RoR2Application.onLoad += AddCostType;
 
-            GameObject TheFrog = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/moon/FrogInteractable.prefab").WaitForCompletion();
-            TheFrog.GetComponent<PurchaseInteraction>().cost = FrogCost.Value;
-            TheFrog.GetComponent<FrogController>().maxPets = FrogPets.Value;
-            if (FrogCost.Value <= 0) TheFrog.GetComponent<PurchaseInteraction>().costType = CostTypeIndex.None;
+            Assets.Init();
+            BepConfig.Init();
+            Hooks.Init();
+
+            //Utterly broken, fix later
+            //if (ProperSaveCompatibility.enabled) ProperSaveSetup();
         }
 
-        private void PlayerCharacterMasterController_Awake(On.RoR2.PlayerCharacterMasterController.orig_Awake orig, PlayerCharacterMasterController self)
+        ///
+        /// Override the CostType delegates so that we can use a different coin count check when the artifact is active. Hacky, but works.
+        /// 
+        public void AddCostType()
         {
-            orig(self);
-            self.SetFieldValue("lunarCoinChanceMultiplier", DropChance.Value);
-        }
-
-        private void Run_Start(On.RoR2.Run.orig_Start orig, Run self)
-        {
-            orig(self);
-            if (NetworkServer.active && ResetCoins.Value)
+            CostTypeDef newdef = new CostTypeDef
             {
-                bool check;
-                if (ProperSaveCompatibility.enabled) { check = ProperSaveCompatibility.IsRunNew(); }
-                else { check = Run.instance.stageClearCount == 0?true:false; }
-
-                if (check)
+                costStringFormatToken = "COST_LUNARCOIN_FORMAT",
+                saturateWorldStyledCostString = false,
+                darkenWorldStyledCostString = true,
+                isAffordable = delegate (CostTypeDef costTypeDef, CostTypeDef.IsAffordableContext context)
+                {
+                    if (RunArtifactManager.instance.IsArtifactEnabled(Assets.NewMoonArtifact)) { return ephemeralCoinCount >= context.cost; }
+                    NetworkUser networkUser2 = Util.LookUpBodyNetworkUser(context.activator.gameObject);
+                    return (bool)networkUser2 && networkUser2.lunarCoins >= context.cost;
+                },
+                //Overriding payCost might be unnecessary due to our hooks, but just in case.
+                payCost = delegate (CostTypeDef costTypeDef, CostTypeDef.PayCostContext context)
+                {
+                    NetworkUser networkUser = Util.LookUpBodyNetworkUser(context.activator.gameObject);
+                    if ((bool)networkUser)
                     {
-                    Chat.SendBroadcastChat(new Chat.SimpleChatMessage { baseToken = "<color=#beeca1><size=15px>A new moon rises...</size></color>" });
-                    if (RoR2Application.isInSinglePlayer) { StartCoroutine(DelayedAutomaticCoinRemovalLocal()); }
-                    else { StartCoroutine(DelayedAutomaticCoinRemoval()); }
-                }
-            }
+                        if (RunArtifactManager.instance.IsArtifactEnabled(Assets.NewMoonArtifact)) { ephemeralCoinCount -= context.cost; }
+                        else { networkUser.DeductLunarCoins((uint)context.cost); }
+                        RoR2.Items.MultiShopCardUtils.OnNonMoneyPurchase(context);
+                    }
+                },
+                colorIndex = ColorCatalog.ColorIndex.LunarCoin
+            };
+
+            CostTypeCatalog.Register(CostTypeIndex.LunarCoin, newdef);
         }
 
-        private void SceneDirector_Start(On.RoR2.SceneDirector.orig_Start orig, SceneDirector self)
+        public void RunStartPrefabSetup(bool set = false)
         {
-            orig(self);
-            if (NetworkServer.active)
+            ///
+            /// Swap the Lunar Coin's model and pickup settings around based on whether the artifact is enabled.
+            ///
+            //Text stuff
+            PickupDef TheCoinDef = PickupCatalog.FindPickupIndex("LunarCoin.Coin0").pickupDef;
+            TheCoinDef.nameToken = set ? "Ephemeral Coin" : "PICKUP_LUNAR_COIN";
+            TheCoinDef.interactContextToken = set ? "Pick up Ephemeral Coin" : "LUNAR_COIN_PICKUP_CONTEXT";
+
+            //Outline color
+            TheCoinDef.baseColor = set ? new Color32(96, 254, byte.MaxValue, byte.MaxValue) : new Color32(48, 127, byte.MaxValue, byte.MaxValue);
+
+            //Chatbox color
+            TheCoinDef.darkColor = set ? new Color32(152, 168, byte.MaxValue, byte.MaxValue) : new Color32(76, 84, 144, byte.MaxValue);
+
+            //Filling our Lunar Coin's hole.
+            GameObject TheCoin = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/LunarCoin/PickupLunarCoin.prefab").WaitForCompletion();
+            TheCoin.transform.Find("Coin5Mesh").GetComponent<MeshFilter>().mesh = set ?
+                Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Common/VFX/mdlLunarCoin.fbx").WaitForCompletion().GetComponent<MeshFilter>().mesh
+                :
+                Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Common/VFX/mdlLunarCoinWithHole.fbx").WaitForCompletion().GetComponent<MeshFilter>().mesh;
+
+            //Changing the material used for rendering, so we can have a semi-transparent effect. Hopoo's standard shader doesn't do transparency I guess???
+            TheCoin.transform.Find("Coin5Mesh").GetComponent<MeshRenderer>().material = set ? Assets.mainBundle.LoadAsset<Material>("matEphemeralCoin") : Addressables.LoadAssetAsync<Material>("RoR2/Base/Common/VFX/matLunarCoinPlaceholder.mat").WaitForCompletion();
+
+            /// Model tint
+            /// Swapping the material directly (above) instead of modifying it here.
+            //Material TheCoinMaterial = Addressables.LoadAssetAsync<Material>("RoR2/Base/Common/VFX/matLunarCoinPlaceholder.mat").WaitForCompletion();
+            //TheCoinMaterial.SetColor("_Color", set ? new Color32(100, 220, 250, byte.MaxValue) : new Color32(198, 173, 250, byte.MaxValue));
+            //TheCoinMaterial.SetTexture("_MainTex", set ? Assets.mainBundle.LoadAsset<Texture2D>("texEphemeralCoinDiffuse") : Addressables.LoadAssetAsync<Texture2D>("RoR2/Base/Common/VFX/texLunarCoinDiffuse.png").WaitForCompletion());
+
+            /// Transparency
+            /// Can't actually touch the textures in memory because of RoR2's unity import settings.
+            /// Solved by changing the texture instead. Kept this snippet for educational purposes.
+            /*Texture2D TheCoinDiffuse = Addressables.LoadAssetAsync<Texture2D>("RoR2/Base/Common/VFX/texLunarCoinDiffuse.png").WaitForCompletion();
+            Color[] d = TheCoinDiffuse.GetPixels();
+            foreach (Color p in d)
             {
-                StartCoroutine(DelayedLunarPriceChange());
-                numTimesRerolled = 0;
+                p.SetFieldValue("a", set ? 0.5f : 1f);
             }
-        }
+            TheCoinDiffuse.SetPixels(d);
+            */
 
-        private void BazaarController_SetUpSeerStations(On.RoR2.BazaarController.orig_SetUpSeerStations orig, BazaarController self)
-        {
-            orig(self);
-            foreach (SeerStationController seerStationController in self.seerStations)
+            ///
+            /// Changing the interactable costs.
+            ///
+            /// Only the LunarChest (pods) and FrogInteractable (moonfrog) actually do anything here, because Bazaar is full of pre-loaded instances of the prefabs.
+            /// Still change the other prefabs anyway, just in case Hopoo decides to change something down the line.
+            /// The Seer Stations will always require hooks, because their scripts set their price at runtime. Why? Ask Hopoo.
+            foreach (string x in Assets.lunarInteractables)
             {
-                seerStationController.GetComponent<PurchaseInteraction>().Networkcost = SeerCost.Value;
-                if (seerStationController.GetComponent<PurchaseInteraction>().Networkcost == 0) { seerStationController.GetComponent<PurchaseInteraction>().costType = CostTypeIndex.None; }
-            }
-        }
+                GameObject z = Addressables.LoadAssetAsync<GameObject>(x).WaitForCompletion();
+                int zValue = 0;
 
-        private void TeleporterInteraction_Start(On.RoR2.TeleporterInteraction.orig_Start orig, TeleporterInteraction self)
-        {
-            self.baseShopSpawnChance = PortalChance.Value;
-            if (!PortalScale.Value)
-            {
-                int shopCount = Run.instance.shopPortalCount;
-                Run.instance.shopPortalCount = 0;
-                orig(self);
-                Run.instance.shopPortalCount = shopCount;
-            }
-            else
-            {
-                orig(self);
-            }
-        }
-
-        public void PurchaseInteraction_ScaleCost(On.RoR2.PurchaseInteraction.orig_ScaleCost orig, PurchaseInteraction self, float scalar)
-        {
-            if (self.name.StartsWith("LunarRecycler")) { scalar = RerollScale.Value; }
-            orig(self, scalar);
-        }
-
-        [Server]
-        private void PurchaseInteraction_SetAvailable(On.RoR2.PurchaseInteraction.orig_SetAvailable orig, PurchaseInteraction self, bool newAvailable)
-        {
-            if(self.name.StartsWith("LunarRecycler")){
-                if (RerollAmount.Value < 1 || RerollAmount.Value > numTimesRerolled) { orig(self, newAvailable); }
-                else { orig(self, false); }
-                numTimesRerolled++;
-            } else { orig(self, newAvailable); }
-        }
-
-        [Server]
-        private void ShopTerminalBehavior_GenerateNewPickupServer(On.RoR2.ShopTerminalBehavior.orig_GenerateNewPickupServer orig, ShopTerminalBehavior self)
-        {
-            if (ShopRefresh.Value && self.name.StartsWith("LunarShop")) { self.NetworkhasBeenPurchased = false; }
-            orig(self);
-            if (ShopRefresh.Value && self.name.StartsWith("LunarShop")) { self.GetComponent<PurchaseInteraction>().SetAvailable(true); }
-        }
-
-        private void CoinDropHook(ILContext il)
-        {
-            var c = new ILCursor(il);
-
-            c.GotoNext(
-                x => x.MatchDup(),
-                x => x.MatchLdfld<PlayerCharacterMasterController>("lunarCoinChanceMultiplier"),
-                x => x.MatchLdcR4(0.5f),
-                x => x.MatchMul()
-                );
-            c.Index += 2;
-            c.Next.Operand = DropMulti.Value;
-            c.Index += 2;
-            c.EmitDelegate<Func<float, float>>((originalChance) => {
-                //Debug.Log($"{originalChance} vs {DropMin.Value}");
-                return Math.Max(originalChance, DropMin.Value);
-            });
-        }
-
-        public IEnumerator DelayedAutomaticCoinRemovalLocal()
-        {
-            yield return new WaitForSeconds(2f);
-
-            foreach (var n in NetworkUser.readOnlyLocalPlayersList)
-            {
-                if (n.localUser.userProfile.coins > 0)
+                switch (z.name)
                 {
-                    string coinRemovalMessage = $"<color=#beeca1>{n.localUser.userProfile.name}'s</color> <nobr><color=#C6ADFA><sprite name=\"LunarCoin\" tint=1>{n.localUser.userProfile.coins}</color></nobr> vanished into the aether...";
-                    Chat.SendBroadcastChat(new Chat.SimpleChatMessage
-                    {
-                        baseToken = coinRemovalMessage
-                    });
+                    case "LunarRecycler":
+                        zValue = (int)BepConfig.RerollCost.Value;
+                        //Debug.Log("EphemeralCoins PrefabSetup LunarRecycler " + zValue);
+                        break;
+                    case "LunarChest":
+                        zValue = (int)BepConfig.PodCost.Value;
+                        //Debug.Log("EphemeralCoins PrefabSetup LunarChest " + zValue);
+                        break;
+                    case "LunarShopTerminal":
+                        zValue = (int)BepConfig.ShopCost.Value;
+                        //Debug.Log("EphemeralCoins PrefabSetup LunarShopTerminal " + zValue);
+                        break;
+                    case "SeerStation":
+                        zValue = (int)BepConfig.SeerCost.Value;
+                        //Debug.Log("EphemeralCoins PrefabSetup SeerStation " + zValue);
+                        break;
+                    case "FrogInteractable":
+                        zValue = (int)BepConfig.FrogCost.Value;
+                        z.GetComponent<FrogController>().maxPets = (int)BepConfig.FrogPets.Value;
+                        //Debug.Log("EphemeralCoins PrefabSetup FrogInteractable " + zValue);
+                        break;
+                    default:
+                        Debug.LogWarning("EphemeralCoins: Unknown lunarInteractable " + x + ", will default to 0 cost!");
+                        break;
+                }
 
-                    n.localUser.userProfile.coins = 0;
-                    n.CallCmdSetNetLunarCoins(n.localUser.userProfile.coins);
-                }
-                if (StartingCoins.Value > 0)
-                {
-                    n.localUser.userProfile.coins = (uint)StartingCoins.Value;
-                    n.CallCmdSetNetLunarCoins(n.localUser.userProfile.coins);
-                }
+                z.GetComponent<PurchaseInteraction>().Networkcost = zValue;
+                if (zValue == 0) { z.GetComponent<PurchaseInteraction>().costType = CostTypeIndex.None; }
             }
         }
 
-        public IEnumerator DelayedAutomaticCoinRemoval()
+        //TODO: Why the fuck is this broken
+        /*
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public void ProperSaveSetup()
         {
-            yield return new WaitForSeconds(4f);
-            for (int i = 0; i < PlayerCharacterMasterController.instances.Count; i++)
+            ProperSave.SaveFile.OnGatgherSaveData += (dict) =>
             {
-                if (PlayerCharacterMasterController.instances[i].networkUser.lunarCoins > 0)
-                {
-                    string coinRemovalMessage = $"<color=#beeca1>{PlayerCharacterMasterController.instances[i].networkUser.userName}'s</color> <nobr><color=#C6ADFA><sprite name=\"LunarCoin\" tint=1>{PlayerCharacterMasterController.instances[i].networkUser.lunarCoins}</color></nobr> vanished into the aether...";
-                    Chat.SendBroadcastChat(new Chat.SimpleChatMessage
-                    {
-                        baseToken = coinRemovalMessage
-                    });
+                if (dict.ContainsKey("ephemeralCoinCount"))
+                    dict["ephemeralCoinCount"] = ephemeralCoinCount;
+                else
+                    dict.Add("ephemeralCoinCount", ephemeralCoinCount);
+            };
 
-                    PlayerCharacterMasterController.instances[i].networkUser.DeductLunarCoins(PlayerCharacterMasterController.instances[i].networkUser.lunarCoins);
-                }
-                if (StartingCoins.Value > 0)
-                {
-                    PlayerCharacterMasterController.instances[i].networkUser.AwardLunarCoins((uint)StartingCoins.Value);
-                }
-            }
+            ProperSave.Loading.OnLoadingEnded += (save) =>
+            {
+                ephemeralCoinCount = save.GetModdedData<int>("ephemeralCoinCount");
+            };
         }
+        */
 
-        private IEnumerator DelayedLunarPriceChange()
+        ///
+        /// Required for BTB to change the costs of the pre-loaded prefab instances.
+        /// 
+        public IEnumerator DelayedLunarPriceChange()
         {
             yield return new WaitForSeconds(2f);
             var purchaseInteractions = InstanceTracker.GetInstancesList<PurchaseInteraction>();
-            //SceneDef mostRecentSceneDef = SceneCatalog.mostRecentSceneDef;
             foreach (PurchaseInteraction purchaseInteraction in purchaseInteractions)
             {
-                if (purchaseInteraction.name.StartsWith("LunarChest") && !SceneInfo.instance.sceneDef.baseSceneName.StartsWith("bazaar"))
+                if (purchaseInteraction.name.StartsWith("LunarShop"))
                 {
-                    purchaseInteraction.Networkcost = PodCost.Value;
-                    if (purchaseInteraction.Networkcost == 0) { purchaseInteraction.costType = CostTypeIndex.None; }
-                }
-                else if (purchaseInteraction.name.StartsWith("LunarShop"))
-                {
-                    purchaseInteraction.Networkcost = ShopCost.Value;
-                    if (purchaseInteraction.Networkcost == 0) { purchaseInteraction.costType = CostTypeIndex.None; }
+                    purchaseInteraction.Networkcost = (int)BepConfig.ShopCost.Value;
+                    if (BepConfig.ShopCost.Value == 0) { purchaseInteraction.costType = CostTypeIndex.None; }
                 }
                 else if (purchaseInteraction.name.StartsWith("LunarRecycler"))
                 {
-                    purchaseInteraction.Networkcost = RerollCost.Value;
-                    if (purchaseInteraction.Networkcost == 0) { purchaseInteraction.costType = CostTypeIndex.None; }
+                    purchaseInteraction.Networkcost = (int)BepConfig.RerollCost.Value;
+                    if (BepConfig.RerollCost.Value == 0) { purchaseInteraction.costType = CostTypeIndex.None; }
+                }
+            }
+        }
+
+        ///
+        /// Our opening message + starting coins functionality, packed in a coroutine so that it can run alongside Run.Start().
+        ///
+        public IEnumerator DelayedStartingLunarCoins()
+        {
+            yield return new WaitForSeconds(1f);
+            Chat.SendBroadcastChat(new Chat.SimpleChatMessage { baseToken = "<color=#beeca1><size=15px>A new moon rises...</size></color>" });
+            for (int i = 0; i < PlayerCharacterMasterController.instances.Count; i++)
+            {
+                PlayerCharacterMasterController.instances[i].networkUser.DeductLunarCoins((uint)ephemeralCoinCount);
+            }
+
+            yield return new WaitForSeconds(3f);
+            if (BepConfig.StartingCoins.Value > 0)
+            {
+                for (int i = 0; i < PlayerCharacterMasterController.instances.Count; i++)
+                {
+                    Chat.SendBroadcastChat(new Chat.SimpleChatMessage
+                    {
+                        baseToken = "<nobr><color=#adf2fa><sprite name=\"LunarCoin\" tint=1>" + BepConfig.StartingCoins.Value + "</color></nobr> " + (BepConfig.StartingCoins.Value > 1 ? "coins fade" : "coin fades") + " into existence..."
+                    });
+                    PlayerCharacterMasterController.instances[i].networkUser.AwardLunarCoins((uint)BepConfig.StartingCoins.Value);
                 }
             }
         }

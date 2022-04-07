@@ -1,33 +1,29 @@
 # Ephemeral Coins
 
-This mod aims to rebalance the Lunar Coin mechanic as a temporary currency, rather than a farmable one, in the hopes of improving not only the balance, but also the general satisfaction involved in acquiring Lunar Coins.
+Provides settings to control various aspects relating to Lunar Coins, including an Artifact that replaces them with temporary, per-run fascimiles that do not affect your save file's coin count. Almost all settings are independant and can be used with or without the Artifact.
 
-**All changes are configurable!**
+**All changes are configurable in game with [Risk of Options](https://thunderstore.io/package/Rune580/Risk_Of_Options/)!**
 
-- All Lunar Coins are removed upon starting a run. The amount removed is displayed in chat. [^1]
-- Awards an amount of Lunar Coins to all players after removing all previous coins (default 0).
-- Lunar Coins drop rate changed to 5% / 0.9 falloff / 0.5% min chance.
-- Lunar Pods made free of cost.
-- The Frog made free of cost, and you only have to pet it once.
-- Bazaar Between Time Lunar Buds cost lowered to 1 coin, and refresh when the Slab (Lunar Reroller) is used, even if already purchased.
-- Bazaar Between Time Lunar Seer cost lowered to 1 coin.
-- Bazaar Between Time Slab (Lunar Reroller) made free of cost. Can only be used once.
-- The chance for a Blue Orb to appear on stage start flattened to 37.5%, instead of decreasing for each visit to BBT.
-- Compatible with [ProperSave](https://thunderstore.io/package/KingEnderBrine/ProperSave/)!
+- Artifact of the New Moon: 
+	- Lunar Coins become Ephemeral Coins, a temporary per-run currency.
+	- Config to begin each run with a set number of Ephemeral Coins (default 0, only applies if you are using the Artifact).
 
-[^1]: For players who wish to restore their Lunar Coins, it is easily done through editing the "<coins>" tag in the save profile.
-
-You can reach me (Varna) in the [RoR2 modding discord](https://discord.gg/5MbXZvd) with any feedback!
+- Independant settings:
+	- Lunar Coins drop rate changed to 5% / 0.9 falloff / 0.5% min chance.
+	- Lunar Pods made free of cost.
+	- The Frog made free of cost, and you only have to pet it once.
+	- Bazaar Between Time Lunar Buds cost lowered to 1 coin, and refresh when the Slab (Lunar Reroller) is used, even if already purchased.
+	- Bazaar Between Time Lunar Seer cost lowered to 1 coin.
+	- Bazaar Between Time Slab (Lunar Reroller) made free of cost. Can only be used once.
+	- The chance for a Blue Orb to appear on stage start flattened to 37.5%, instead of decreasing for each visit to BBT.
 
 ## Known Issues
 
-- Occasionally, players in a multiplayer lobby do not appear to lose their coins client-side, despite the message in chat. The server still treats them as having 0 coins, however. (possibly ping related, unsure at this time)
+- None, but very little multiplayer testing has been done. Please report any bugs on [Github](https://github.com/VarnaScelestus/RoR2).
 
-## Todo (maybe)
+## Todo
 
-- Refactoring old hook-based code with prettier prefab-modification code.
-- Add Newt Altars to the controllable settings.
-- Brainstorming on what to do with Lunar Coins received from obliterating/beating the game.
+- Fix compatibility with [ProperSave](https://thunderstore.io/package/KingEnderBrine/ProperSave/) which was broken by 2.0.0's codebase refactor.
 
 ## Credits
 
@@ -36,6 +32,8 @@ You can reach me (Varna) in the [RoR2 modding discord](https://discord.gg/5MbXZv
 [RoR2 modding discord](https://discord.gg/5MbXZvd) - For help in figuring out the Slab (Lunar Reroller)'s horrible, horrible internal structure, and just being awesome in general!
 
 ## Changelog
+
+2.0.0 - Major codebase refactor. Added Artifact of the New Moon, allowing you to toggle whether to use temporary coins on a per run basis without affecting your save file. Added [Risk of Options](https://thunderstore.io/package/Rune580/Risk_Of_Options/) integration.
 
 1.4.0 - Added THE FROG.
 

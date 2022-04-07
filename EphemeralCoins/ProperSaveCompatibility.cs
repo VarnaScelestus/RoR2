@@ -1,20 +1,26 @@
-﻿public static class ProperSaveCompatibility
+﻿using System.Runtime.CompilerServices;
+
+namespace EphemeralCoins
 {
-    private static bool? _enabled;
-
-    public static bool enabled
+    public static class ProperSaveCompatibility
     {
-        get
+        private static bool? _enabled;
+
+        public static bool enabled
         {
-            if (_enabled == null){
-                _enabled = BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("com.KingEnderBrine.ProperSave");
+            get
+            {
+                if (_enabled == null) {
+                    _enabled = BepInEx.Bootstrap.Chainloader.PluginInfos.ContainsKey("com.KingEnderBrine.ProperSave");
+                }
+                return (bool)_enabled;
             }
-            return (bool)_enabled;
         }
-    }
 
-    public static bool IsRunNew()
-    {
-        return !ProperSave.Loading.IsLoading;
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static bool IsRunNew()
+        {
+            return !ProperSave.Loading.IsLoading;
+        }
     }
 }

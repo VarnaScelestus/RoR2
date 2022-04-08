@@ -18,6 +18,8 @@ You can reach me (Varna) in the [RoR2 modding discord](https://discord.gg/5MbXZv
 
 ## Changelog
 
+1.3.1 - Rewrote some hooks to (hopefully) avoid compatibility issues with other mods.
+
 1.3.0 - Fixed the HUD not updating the OSP fraction properly with the new settings, and added a setting to disable maxHP reduction's vanilla HUD "improvements".
 
 1.2.0 - Added setting to control whether Shield affects OSP.

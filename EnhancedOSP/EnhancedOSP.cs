@@ -1,6 +1,5 @@
 ﻿using BepInEx;
 using BepInEx.Configuration;
-using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using System;
 using UnityEngine;
@@ -8,7 +7,7 @@ using RoR2;
 
 namespace EnhancedOSP
 {
-    [BepInPlugin("com.Varna.EnhancedOSP", "EnhancedOSP", "1.3.0")]
+    [BepInPlugin("com.Varna.EnhancedOSP", "EnhancedOSP", "1.3.1")]
     public class EnhancedOSP : BaseUnityPlugin
     {
         private static ConfigEntry<float> invTime;
@@ -20,44 +19,15 @@ namespace EnhancedOSP
         public void Awake()
         {
             invTime = Config.Bind("", "Invulnerable Time", 0.5f, new ConfigDescription("The amount of time a player remains invulnerable after one shot protection is triggered. Vanilla is 0.1"));
-            IL.RoR2.HealthComponent.TriggerOneShotProtection += (il) =>
-            {
-                ILCursor c = new ILCursor(il);
-                c.GotoNext(
-                    x => x.MatchLdarg(0),
-                    x => x.MatchLdcR4(0.1f)
-                    );
-                c.Index++;
-                c.Next.Operand = invTime.Value;
-            };
-            Logger.LogDebug("Invuln time patched");
-            
             invThreshold = Config.Bind("", "OSP Threshold", 0.1f, new ConfigDescription("How much missing hp% before OSP is disabled. Vanilla is 0.1"));
             curseAffectsOSP = Config.Bind("", "Curse Behavior", false, new ConfigDescription("Whether or not sources of MaxHP reduction (Shaped Glass, etc) remove OSP. Vanilla is true"));
-            IL.RoR2.CharacterBody.RecalculateStats += (il) =>
-            {
-
-                ILCursor c = new ILCursor(il);
-                c.GotoNext(
-                    x => x.MatchLdarg(0),
-                    x => x.MatchLdcR4(0.1f),
-                    x => x.MatchCallOrCallvirt<RoR2.CharacterBody>("set_oneShotProtectionFraction")
-                    );
-                c.Index++;
-                c.Next.Operand = invThreshold.Value;
-                Logger.LogDebug("OSP threshold patched");
-
-                c.GotoNext(
-                    x => x.MatchCallOrCallvirt<Mathf>("Max"),
-                    x => x.MatchCallOrCallvirt<RoR2.CharacterBody>("set_oneShotProtectionFraction")
-                    );
-                c.Index++;
-                c.Emit(OpCodes.Ldarg_0);
-                c.EmitDelegate<Func<float, RoR2.CharacterBody, float>>((origFrac, body) => { return curseAffectsOSP.Value ?  origFrac : body.oneShotProtectionFraction; });
-                Logger.LogDebug("Curse behavior patched");
-            };
-
             shieldAffectsOSP = Config.Bind("", "Shield Behavior", false, new ConfigDescription("Whether or not sources of Shield (Personal Shield Generator, Overloading affix, etc) count toward your maximum HP for OSP calculations. Vanilla is true [Note: Trancendence and Perfected Elite Affix behavior unaffected to avoid godmode issues]"));
+            removeCurseDisplay = Config.Bind("", "Curse Healthbar Display", false, new ConfigDescription("Whether or not sources of MaxHP reduction (Shaped Glass, etc) are represented on the HUD via a pointless 'glass' effect that takes up space and makes the bar harder to read during gameplay. Vanilla is true"));
+
+            On.RoR2.CharacterBody.RecalculateStats += CharacterBody_RecalculateStats;
+            On.RoR2.HealthComponent.TriggerOneShotProtection += HealthComponent_TriggerOneShotProtection;
+            On.RoR2.HealthComponent.GetHealthBarValues += HealthComponent_GetHealthBarValues;
+
             IL.RoR2.HealthComponent.TakeDamage += (il) =>
             {
                 ILCursor c = new ILCursor(il);
@@ -77,67 +47,73 @@ namespace EnhancedOSP
                     hc.fullHealth;
                 });
             };
-            Logger.LogDebug("Shield behavior patched");
+            Logger.LogDebug("Shield behavior IL patched");
 
-            removeCurseDisplay = Config.Bind("", "Curse Healthbar Display", false, new ConfigDescription("Whether or not sources of MaxHP reduction (Shaped Glass, etc) are represented on the HUD via a pointless 'glass' effect that takes up space and makes the bar harder to read during gameplay. Vanilla is true"));
+            /*
             IL.RoR2.HealthComponent.GetHealthBarValues += (il) =>
             {
                 ILCursor c = new ILCursor(il);
                 c.GotoNext(
-                    // 	float num = 1f - 1f / body.cursePenalty;
-                    /*
-                    IL_0000: ldc.r4 1
-
-                    IL_0005: ldc.r4 1
-
-                    IL_000a: ldarg.0
-
-                    IL_000b: ldfld class RoR2.CharacterBody RoR2.HealthComponent::body
-
-                    IL_0010: callvirt instance float32 RoR2.CharacterBody::get_cursePenalty()
-                    IL_0015: div
-                    IL_0016: sub
-                    IL_0017: stloc.0
-                    */
-                    x => x.MatchCallOrCallvirt<RoR2.CharacterBody>("get_cursePenalty")
+                    x => x.Match(OpCodes.Ret)
                     );
-                c.Remove();
-                c.EmitDelegate<Func<RoR2.CharacterBody, float>>( (body) => { return removeCurseDisplay.Value ? body.cursePenalty : 1f; } );
-                Logger.LogDebug("Curse healthbar display setting patched");
+                c.Emit(OpCodes.Ldarg_0);
+                c.EmitDelegate<Func<RoR2.HealthComponent.HealthBarValues, RoR2.HealthComponent, RoR2.HealthComponent.HealthBarValues>>((values, hc) => {
+                    values.curseFraction = 1f - 1f / (removeCurseDisplay.Value ? hc.body.cursePenalty : 1f);
 
-                //This section fixes the HUD to work with our previous changes.
-                c.GotoNext(
-                    // 	float num3 = body.oneShotProtectionFraction * fullCombinedHealth - missingCombinedHealth;
-                    /*
-                    IL_0027: ldarg.0
+                    var num2 = (1f - values.curseFraction) / hc.fullCombinedHealth;
 
-                    IL_0028: ldfld class RoR2.CharacterBody RoR2.HealthComponent::body
+                    values.cullFraction = ((hc.isInFrozenState && (hc.body.bodyFlags & CharacterBody.BodyFlags.ImmuneToExecutes) == 0) ? Mathf.Clamp01(0.3f * hc.fullCombinedHealth * num2) : 0f);
+                    values.healthFraction = Mathf.Clamp01(hc.health * num2);
+                    values.shieldFraction = Mathf.Clamp01(hc.shield * num2);
+                    values.barrierFraction = Mathf.Clamp01(hc.barrier * num2);
+                    values.magneticFraction = Mathf.Clamp01(hc.magnetiCharge * num2);
 
-                    IL_002d: callvirt instance float32 RoR2.CharacterBody::get_oneShotProtectionFraction()
-                    IL_0032: ldarg.0
-
-                    IL_0033: call instance float32 RoR2.HealthComponent::get_fullCombinedHealth()
-                    IL_0038: mul
-                    IL_0039: ldarg.0
-
-                    IL_003a: call instance float32 RoR2.HealthComponent::get_missingCombinedHealth()
-                    IL_003f: sub
-                    IL_0040: stloc.2
-                    */
-                    x => x.MatchCallOrCallvirt<RoR2.CharacterBody>("get_oneShotProtectionFraction")
-                    );
-                c.Index--;
-                c.RemoveRange(8);
-                c.EmitDelegate<Func<RoR2.HealthComponent, float>>((hc) => { 
-                    return (shieldAffectsOSP.Value || hc.body.inventory.GetItemCount(RoR2Content.Items.ShieldOnly) > 0 || hc.body.HasBuff(RoR2Content.Buffs.AffixLunar)) 
+                    values.ospFraction = (shieldAffectsOSP.Value || hc.body.inventory.GetItemCount(RoR2Content.Items.ShieldOnly) > 0 || hc.body.HasBuff(RoR2Content.Buffs.AffixLunar))
                     ?
-                    hc.body.oneShotProtectionFraction * hc.fullCombinedHealth - hc.missingCombinedHealth
+                    (hc.body.oneShotProtectionFraction * hc.fullCombinedHealth - hc.missingCombinedHealth) * num2
                     :
-                    hc.body.oneShotProtectionFraction * hc.fullHealth - (hc.fullHealth - hc.health); 
-                });
-                Logger.LogDebug("OSP healthbar display fix patched");
-            };
+                    (hc.body.oneShotProtectionFraction * hc.fullHealth - (hc.fullHealth - hc.health)) * num2;
 
+                    return values;
+                });
+                Logger.LogDebug("HealthBar display patched");
+            };
+            */
+        }
+
+        private void CharacterBody_RecalculateStats(On.RoR2.CharacterBody.orig_RecalculateStats orig, CharacterBody self)
+        {
+            orig(self);
+            self.oneShotProtectionFraction = Mathf.Max(0f, invThreshold.Value - (1f - 1f / (curseAffectsOSP.Value ? self.cursePenalty : 1f)));
+        }
+
+        private void HealthComponent_TriggerOneShotProtection(On.RoR2.HealthComponent.orig_TriggerOneShotProtection orig, HealthComponent self)
+        {
+            orig(self);
+            self.ospTimer = invTime.Value;
+        }
+
+        private HealthComponent.HealthBarValues HealthComponent_GetHealthBarValues(On.RoR2.HealthComponent.orig_GetHealthBarValues orig, HealthComponent self)
+        {
+            HealthComponent.HealthBarValues values = orig(self);
+
+            values.curseFraction = 1f - 1f / (removeCurseDisplay.Value ? self.body.cursePenalty : 1f);
+
+            var num2 = (1f - values.curseFraction) / self.fullCombinedHealth;
+
+            values.cullFraction = ((self.isInFrozenState && (self.body.bodyFlags & CharacterBody.BodyFlags.ImmuneToExecutes) == 0) ? Mathf.Clamp01(0.3f * self.fullCombinedHealth * num2) : 0f);
+            values.healthFraction = Mathf.Clamp01(self.health * num2);
+            values.shieldFraction = Mathf.Clamp01(self.shield * num2);
+            values.barrierFraction = Mathf.Clamp01(self.barrier * num2);
+            values.magneticFraction = Mathf.Clamp01(self.magnetiCharge * num2);
+
+            values.ospFraction = (shieldAffectsOSP.Value || self.body.inventory.GetItemCount(RoR2Content.Items.ShieldOnly) > 0 || self.body.HasBuff(RoR2Content.Buffs.AffixLunar))
+            ?
+            (self.body.oneShotProtectionFraction * self.fullCombinedHealth - self.missingCombinedHealth) * num2
+            :
+            (self.body.oneShotProtectionFraction * self.fullHealth - (self.fullHealth - self.health)) * num2;
+
+            return values;
         }
     }
 }

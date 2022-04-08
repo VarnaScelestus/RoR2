@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <Version>1.2.2</Version>
+    <Version>2.2.0</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -11,15 +11,18 @@
   </PropertyGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="if &quot;$(Username)&quot; == &quot;Varna&quot; copy /Y &quot;$(TargetPath)&quot; &quot;C:\Users\rylun\Documents\Modding Projects\Risk of Rain 2\VarnaScelestus\EphemeralCoins\plugins&quot;&#xD;&#xA;if &quot;$(Username)&quot; == &quot;Varna&quot; copy /Y &quot;$(ProjectDir)\UnityProject\AssetBundles\StandaloneWindows\ephemeralcoins&quot; &quot;C:\Users\rylun\Documents\Modding Projects\Risk of Rain 2\VarnaScelestus\EphemeralCoins\plugins\assetbundles&quot;&#xD;&#xA;if &quot;$(Username)&quot; == &quot;Varna&quot; mkdir &quot;C:\Users\rylun\AppData\Roaming\r2modmanPlus-local\RiskOfRain2\profiles\DevTest\BepInEx\plugins\DEVTEST&quot;&#xD;&#xA;if &quot;$(Username)&quot; == &quot;Varna&quot; mkdir &quot;C:\Users\rylun\AppData\Roaming\r2modmanPlus-local\RiskOfRain2\profiles\DevTest\BepInEx\plugins\DEVTEST\assetbundles&quot;&#xD;&#xA;if &quot;$(Username)&quot; == &quot;Varna&quot; copy /Y &quot;$(ProjectDir)\plugins&quot; &quot;C:\Users\rylun\AppData\Roaming\r2modmanPlus-local\RiskOfRain2\profiles\DevTest\BepInEx\plugins\DEVTEST&quot;&#xD;&#xA;if &quot;$(Username)&quot; == &quot;Varna&quot; copy /Y &quot;$(ProjectDir)\plugins\assetbundles&quot; &quot;C:\Users\rylun\AppData\Roaming\r2modmanPlus-local\RiskOfRain2\profiles\DevTest\BepInEx\plugins\DEVTEST\assetbundles&quot;" />
+    <Exec Command="if &quot;$(Username)&quot; == &quot;Varna&quot; copy /Y &quot;$(TargetPath)&quot; &quot;C:\Users\rylun\Documents\Modding Projects\Risk of Rain 2\VarnaScelestus\EphemeralCoins\plugins&quot;&#xD;&#xA;if &quot;$(Username)&quot; == &quot;Varna&quot; copy /Y &quot;$(ProjectDir)\UnityProject\AssetBundles\StandaloneWindows\ephemeralcoins&quot; &quot;C:\Users\rylun\Documents\Modding Projects\Risk of Rain 2\VarnaScelestus\EphemeralCoins\plugins\assetbundles&quot;&#xD;&#xA;if &quot;$(Username)&quot; == &quot;Varna&quot; mkdir &quot;C:\Users\rylun\AppData\Roaming\r2modmanPlus-local\RiskOfRain2\profiles\DevTest\BepInEx\plugins\EphemeralCoins-DEVTEST&quot;&#xD;&#xA;if &quot;$(Username)&quot; == &quot;Varna&quot; mkdir &quot;C:\Users\rylun\AppData\Roaming\r2modmanPlus-local\RiskOfRain2\profiles\DevTest\BepInEx\plugins\EphemeralCoins-DEVTEST\assetbundles&quot;&#xD;&#xA;if &quot;$(Username)&quot; == &quot;Varna&quot; copy /Y &quot;$(ProjectDir)\plugins&quot; &quot;C:\Users\rylun\AppData\Roaming\r2modmanPlus-local\RiskOfRain2\profiles\DevTest\BepInEx\plugins\EphemeralCoins-DEVTEST&quot;&#xD;&#xA;if &quot;$(Username)&quot; == &quot;Varna&quot; copy /Y &quot;$(ProjectDir)\plugins\assetbundles&quot; &quot;C:\Users\rylun\AppData\Roaming\r2modmanPlus-local\RiskOfRain2\profiles\DevTest\BepInEx\plugins\EphemeralCoins-DEVTEST\assetbundles&quot;" />
   </Target>
 
   <ItemGroup>
     <Compile Remove="EphemeralCoins\**" />
+    <Compile Remove="plugins\**" />
     <Compile Remove="UnityProject\**" />
     <EmbeddedResource Remove="EphemeralCoins\**" />
+    <EmbeddedResource Remove="plugins\**" />
     <EmbeddedResource Remove="UnityProject\**" />
     <None Remove="EphemeralCoins\**" />
+    <None Remove="plugins\**" />
     <None Remove="UnityProject\**" />
   </ItemGroup>
 

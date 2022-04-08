@@ -50,12 +50,12 @@ namespace EphemeralCoins
         {
             //Makes changes to the Lunar Coin and related shop prefabs based on if the artifact is on or off.
             //Done before anything else initializes so that prices are correct in stage 1.
-            EphemeralCoins.instance.RunStartPrefabSetup(RunArtifactManager.instance.IsArtifactEnabled(Assets.NewMoonArtifact));
+            EphemeralCoins.instance.RunStartPrefabSetup(EphemeralCoins.instance.artifactEnabled);
 
             orig(self);
 
             //Start message + starting coins functionality
-            if (NetworkServer.active && RunArtifactManager.instance.IsArtifactEnabled(Assets.NewMoonArtifact))
+            if (NetworkServer.active && EphemeralCoins.instance.artifactEnabled)
             {
                 bool check;
                 if (ProperSaveCompatibility.enabled) { check = ProperSaveCompatibility.IsRunNew(); }
@@ -68,20 +68,29 @@ namespace EphemeralCoins
             }
         }
 
+        #region EphemeralCoin
         private static void HUD_Update(On.RoR2.UI.HUD.orig_Update orig, RoR2.UI.HUD self)
         {
             orig(self);
-            if (RunArtifactManager.instance && RunArtifactManager.instance.IsArtifactEnabled(Assets.NewMoonArtifact))
+            if (RunArtifactManager.instance && EphemeralCoins.instance.artifactEnabled)
             {
                 self.lunarCoinText.targetValue = (int)EphemeralCoins.instance.getCoinsFromUser(self._localUserViewer.currentNetworkUser);
                 self.lunarCoinContainer.transform.Find("LunarCoinSign").GetComponent<RoR2.UI.HGTextMeshProUGUI>().text = "<sprite name=\"LunarCoin\" color=#adf2fa>";
             }
         }
 
+        private static void Run_OnUserAdded(On.RoR2.Run.orig_OnUserAdded orig, Run self, NetworkUser user)
+        {
+            orig(self, user);
+            if (Run.instance.time > 1f)
+                EphemeralCoins.instance.SetupCoinStorage(EphemeralCoins.instance.coinCounts, false);
+        }
+
         private static void NetworkUser_RpcAwardLunarCoins(On.RoR2.NetworkUser.orig_RpcAwardLunarCoins orig, RoR2.NetworkUser self, uint count)
         {
-            if (RunArtifactManager.instance && RunArtifactManager.instance.IsArtifactEnabled(Assets.NewMoonArtifact))
+            if (RunArtifactManager.instance && EphemeralCoins.instance.artifactEnabled)
             {
+                orig(self, 0);
                 EphemeralCoins.instance.giveCoinsToUser(self, count);
                 self.SyncLunarCoinsToServer();
             }
@@ -90,8 +99,9 @@ namespace EphemeralCoins
 
         private static void NetworkUser_RpcDeductLunarCoins(On.RoR2.NetworkUser.orig_RpcDeductLunarCoins orig, RoR2.NetworkUser self, uint count)
         {
-            if (RunArtifactManager.instance && RunArtifactManager.instance.IsArtifactEnabled(Assets.NewMoonArtifact))
+            if (RunArtifactManager.instance && EphemeralCoins.instance.artifactEnabled)
             {
+                orig(self, 0);
                 EphemeralCoins.instance.takeCoinsFromUser(self, count);
                 self.SyncLunarCoinsToServer();
             }
@@ -100,13 +110,15 @@ namespace EphemeralCoins
 
         private static void NetworkUser_SyncLunarCoinsToServer(On.RoR2.NetworkUser.orig_SyncLunarCoinsToServer orig, RoR2.NetworkUser self)
         {
-            if (RunArtifactManager.instance && RunArtifactManager.instance.IsArtifactEnabled(Assets.NewMoonArtifact))
+            orig(self);
+            if (RunArtifactManager.instance && EphemeralCoins.instance.artifactEnabled)
             {
                 self.CallCmdSetNetLunarCoins((uint)EphemeralCoins.instance.getCoinsFromUser(self));
             }
-            else orig(self);
         }
+        #endregion
 
+        #region CoinDrop
         private static void PlayerCharacterMasterController_Awake(On.RoR2.PlayerCharacterMasterController.orig_Awake orig, PlayerCharacterMasterController self)
         {
             orig(self);
@@ -131,7 +143,9 @@ namespace EphemeralCoins
                 return Math.Max(originalChance, BepConfig.DropMin.Value);
             });
         }
+        #endregion
 
+        #region BlueOrb
         private static void TeleporterInteraction_Start(On.RoR2.TeleporterInteraction.orig_Start orig, TeleporterInteraction self)
         {
             self.baseShopSpawnChance = BepConfig.PortalChance.Value;
@@ -144,6 +158,7 @@ namespace EphemeralCoins
             }
             else { orig(self); }
         }
+        #endregion
 
         #region BazaarOfBullshit
         private static void SceneDirector_Start(On.RoR2.SceneDirector.orig_Start orig, SceneDirector self)
@@ -193,31 +208,5 @@ namespace EphemeralCoins
         }
         #endregion
 
-        #region CoinStorage
-        private static void Run_OnUserAdded(On.RoR2.Run.orig_OnUserAdded orig, Run self, NetworkUser user)
-        {
-            orig(self, user);
-            if (Run.instance.time > 1f)
-                EphemeralCoins.instance.SetupCoinStorage(EphemeralCoins.instance.coinCounts, false);
-        }
-
-        /*private static void Run_OnUserRemoved(On.RoR2.Run.orig_OnUserRemoved orig, Run self, NetworkUser user)
-        {
-            orig(self, user);
-            if (Run.instance.time > 1f)
-            {
-                EphemeralCoins.CoinStorage target = null;
-                foreach (EphemeralCoins.CoinStorage player in EphemeralCoins.instance.coinCounts)
-                {
-                    if (player.user.userName == user.userName)
-                    {
-                        target = player;
-                        break;
-                    }
-                }
-                EphemeralCoins.instance.coinCounts.Remove(target);
-            }
-        }*/
-        #endregion
     }
 }

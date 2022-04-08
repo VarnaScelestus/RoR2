@@ -5,12 +5,13 @@ using RiskOfOptions.Options;
 using RiskOfOptions.OptionConfigs;
 using UnityEngine;
 using R2API;
+using System;
 
 namespace EphemeralCoins
 {
     public class BepConfig
     {
-        public static ConfigEntry<bool> EnableArtifact;
+        public static ConfigEntry<float> EnableArtifact;
         public static ConfigEntry<float> StartingCoins;
 
         public static ConfigEntry<float> DropChance;
@@ -31,7 +32,7 @@ namespace EphemeralCoins
 
         public static void Init()
         {
-            EnableArtifact = EphemeralCoins.instance.Config.Bind("1. Artifact", "Enable Artifact?", true, new ConfigDescription("Add the Artifact of the New Moon to the list of selectable artifacts."));
+            EnableArtifact = EphemeralCoins.instance.Config.Bind("1. Artifact", "Run Mode", 1f, new ConfigDescription("If set to 0, disables the artifact. If set to 1, enables the artifact. If set to 2, disables the artifact but enables the artifact's effects at all times."));
 
             StartingCoins = EphemeralCoins.instance.Config.Bind("1. Artifact", "Starting Coins", 0f, new ConfigDescription("The number of coins each player starts with when using the artifact."));
 
@@ -63,11 +64,27 @@ namespace EphemeralCoins
 
             RerollScale = EphemeralCoins.instance.Config.Bind("3. Bazaar Between Time", "Reroll Scale", 2f, new ConfigDescription("The cost multiplier per use of the Slab (reroller) in BTB. Vanilla is 2"));
 
-            if (BepConfig.EnableArtifact.Value) ContentAddition.AddArtifactDef(Assets.NewMoonArtifact);
+            if (BepConfig.EnableArtifact.Value == 1f) ContentAddition.AddArtifactDef(Assets.NewMoonArtifact);
 
             if ( RiskOfOptionsCompatibility.enabled ) {
-                ModSettingsManager.AddOption(new CheckBoxOption(EnableArtifact, new CheckBoxConfig() { restartRequired = true, checkIfDisabled = delegate () { return (Run.instance != null); } }));
-                ModSettingsManager.AddOption(new StepSliderOption(StartingCoins, new StepSliderConfig() { min = 0, max = 100, increment = 1f, checkIfDisabled = delegate () { return (Run.instance != null && EnableArtifact.Value); } }));
+                ModSettingsManager.AddOption(new StepSliderOption(EnableArtifact, new StepSliderConfig() { min = 0, max = 2, increment = 1f, restartRequired = true, checkIfDisabled = delegate () { return (Run.instance != null); } }));
+
+                /* Event to dynamically add/remove the artifact from the selectable pool. Needs more research
+                EnableArtifact.SettingChanged += (object sender, EventArgs e) => {
+                    switch (EnableArtifact.Value)
+                    {
+                        case 0f:
+                        case 2f:
+                            //remove the artifact
+                            break;
+                        case 1f:
+                            //add the artifact
+                            break;
+                    }
+                };
+                */
+
+                ModSettingsManager.AddOption(new StepSliderOption(StartingCoins, new StepSliderConfig() { min = 0, max = 100, increment = 1f, checkIfDisabled = delegate () { return (Run.instance != null || EnableArtifact.Value == 0f); } }));
                 ModSettingsManager.AddOption(new StepSliderOption(DropChance, new StepSliderConfig() { min = 0, max = 100, increment = 0.1f, checkIfDisabled = delegate () { return (Run.instance != null); } }));
                 ModSettingsManager.AddOption(new StepSliderOption(DropMulti, new StepSliderConfig() { min = 0, max = 1, increment = 0.01f, checkIfDisabled = delegate () { return (Run.instance != null); } }));
                 ModSettingsManager.AddOption(new StepSliderOption(DropMin, new StepSliderConfig() { min = 0, max = 100, increment = 0.01f, checkIfDisabled = delegate () { return (Run.instance != null); } }));

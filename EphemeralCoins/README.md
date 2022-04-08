@@ -4,18 +4,16 @@ Provides settings to control various aspects relating to Lunar Coins, including 
 
 **All changes are configurable in game with [Risk of Options](https://thunderstore.io/package/Rune580/Risk_Of_Options/)!**
 
-- Artifact of the New Moon: 
-	- Lunar Coins become Ephemeral Coins, a temporary per-run currency.
-	- Config to begin each run with a set number of Ephemeral Coins (default 0, only applies if you are using the Artifact).
-
-- Independant settings:
-	- Lunar Coins drop rate changed to 5% / 0.9 falloff / 0.5% min chance.
-	- Lunar Pods made free of cost.
-	- The Frog made free of cost, and you only have to pet it once.
-	- Bazaar Between Time Lunar Buds cost lowered to 1 coin, and refresh when the Slab (Lunar Reroller) is used, even if already purchased.
-	- Bazaar Between Time Lunar Seer cost lowered to 1 coin.
-	- Bazaar Between Time Slab (Lunar Reroller) made free of cost. Can only be used once.
-	- The chance for a Blue Orb to appear on stage start flattened to 37.5%, instead of decreasing for each visit to BBT.
+- Artifact of the New Moon: Lunar Coins become Ephemeral Coins, a temporary per-run currency.
+	- Config to disable entirely, or 'always on' mode that applies the effect at all times without an Artifact.
+	- Config to begin each run with a set number of Ephemeral Coins (default 0).
+- Lunar Coins drop rate changed to 5% / 0.9 falloff / 0.5% min chance.
+- Lunar Pods made free of cost.
+- The Frog made free of cost, and you only have to pet it once.
+- Bazaar Between Time Lunar Buds cost lowered to 1 coin, and refresh when the Slab (Lunar Reroller) is used, even if already purchased.
+- Bazaar Between Time Lunar Seer cost lowered to 1 coin.
+- Bazaar Between Time Slab (Lunar Reroller) made free of cost. Can only be used once.
+- The chance for a Blue Orb to appear on stage start flattened to 37.5%, instead of decreasing for each visit to BBT.
 
 ## Known Issues
 
@@ -24,7 +22,7 @@ Provides settings to control various aspects relating to Lunar Coins, including 
 
 ## Todo
 
-- [ProperSave](https://thunderstore.io/package/KingEnderBrine/ProperSave/) compatibility is iffy and needs more testing.
+- Re-implement [ProperSave](https://thunderstore.io/package/KingEnderBrine/ProperSave/) compatibility.
 
 ## Credits
 
@@ -33,6 +31,8 @@ Provides settings to control various aspects relating to Lunar Coins, including 
 [RoR2 modding discord](https://discord.gg/5MbXZvd) - For help in figuring out the Slab (Lunar Reroller)'s horrible, horrible internal structure, and just being awesome in general!
 
 ## Changelog
+
+2.2.0 - Added config option for 'always on' mode. Minor hook changes to attempt to fix some incompatibility issues. Disabled [ProperSave](https://thunderstore.io/package/KingEnderBrine/ProperSave/) related code due to conceptual issues (see [Issue #8](https://github.com/VarnaScelestus/RoR2/issues/8)).
 
 2.1.0 - Reworked how coins are tracked internally so that each player has their own count (oversight from 2.0.0 that was causing major bugs). Fixed compatibility with [ProperSave](https://thunderstore.io/package/KingEnderBrine/ProperSave/) (I hope) and some errors in how [Risk of Options](https://thunderstore.io/package/Rune580/Risk_Of_Options/) integration was handled.
 

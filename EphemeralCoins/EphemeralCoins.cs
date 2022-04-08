@@ -13,7 +13,7 @@ namespace EphemeralCoins
     [NetworkCompatibility(CompatibilityLevel.EveryoneMustHaveMod, VersionStrictness.EveryoneNeedSameModVersion)]
     [BepInDependency("com.KingEnderBrine.ProperSave", BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency("com.rune580.riskofoptions", BepInDependency.DependencyFlags.SoftDependency)]
-    [BepInPlugin("com.Varna.EphemeralCoins", "Ephemeral_Coins", "2.1.0")]
+    [BepInPlugin("com.Varna.EphemeralCoins", "Ephemeral_Coins", "2.2.0")]
     public class EphemeralCoins : BaseUnityPlugin
     {
         public int numTimesRerolled;
@@ -25,6 +25,13 @@ namespace EphemeralCoins
         }
         public List<CoinStorage> coinCounts = new List<CoinStorage>();
 
+        public bool artifactEnabled {
+            get
+            {
+                return BepConfig.EnableArtifact.Value == 2f || RunArtifactManager.instance.IsArtifactEnabled(Assets.NewMoonArtifact);
+            }
+        }
+        
         //public int ephemeralCoinCount;
 
         public static PluginInfo PInfo { get; private set; }
@@ -140,7 +147,7 @@ namespace EphemeralCoins
                 isAffordable = delegate (CostTypeDef costTypeDef, CostTypeDef.IsAffordableContext context)
                 {
                     NetworkUser networkUser2 = Util.LookUpBodyNetworkUser(context.activator.gameObject);
-                    if (RunArtifactManager.instance.IsArtifactEnabled(Assets.NewMoonArtifact)) {
+                    if (artifactEnabled) {
                         foreach (CoinStorage player in coinCounts)
                         {
                             if (player.user == networkUser2)
@@ -254,6 +261,7 @@ namespace EphemeralCoins
             }
         }
 
+        /*
         [MethodImpl(MethodImplOptions.NoInlining)]
         public void ProperSaveSetup()
         {
@@ -270,6 +278,7 @@ namespace EphemeralCoins
                 coinCounts = save.GetModdedData<List<CoinStorage>>("ephemeralCoinCount");
             };
         }
+        */
 
         ///
         /// Required for BTB to change the costs of the pre-loaded prefab instances.

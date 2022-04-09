@@ -55,7 +55,7 @@ namespace EphemeralCoins
             orig(self);
 
             //Start message + starting coins functionality
-            if (NetworkServer.active && EphemeralCoins.instance.artifactEnabled)
+            if (RunArtifactManager.instance && EphemeralCoins.instance.artifactEnabled)
             {
                 bool check;
                 if (ProperSaveCompatibility.enabled) { check = ProperSaveCompatibility.IsRunNew(); }
@@ -63,7 +63,7 @@ namespace EphemeralCoins
                 if (check)
                 {
                     EphemeralCoins.instance.SetupCoinStorage(EphemeralCoins.instance.coinCounts);
-                    EphemeralCoins.instance.StartCoroutine(EphemeralCoins.instance.DelayedStartingLunarCoins());
+                    if (NetworkServer.active) EphemeralCoins.instance.StartCoroutine(EphemeralCoins.instance.DelayedStartingLunarCoins());
                 }
             }
         }

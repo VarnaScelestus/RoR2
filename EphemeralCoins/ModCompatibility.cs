@@ -43,26 +43,33 @@ namespace EphemeralCoins
             }
         }
 
-        public static void InvokeAddOptionStepSlider(ConfigEntry<float> configEntry, int min, int max, float increment, bool checkIfDisabled) => InvokeAddOptionStepSlider(configEntry, min, max, increment, checkIfDisabled, false);
-        public static void InvokeAddOptionStepSlider(ConfigEntry<float> configEntry, int min, int max, float increment, bool checkIfDisabled, bool restartRequired)
+        public static void InvokeAddOptionStepSlider(ConfigEntry<float> configEntry, int min, int max, float increment) => InvokeAddOptionStepSlider(configEntry, min, max, increment, false, false);
+        public static void InvokeAddOptionStepSlider(ConfigEntry<float> configEntry, int min, int max, float increment, bool checkArtifact) => InvokeAddOptionStepSlider(configEntry, min, max, increment, checkArtifact, false);
+        public static void InvokeAddOptionStepSlider(ConfigEntry<float> configEntry, int min, int max, float increment, bool checkArtifact, bool restartRequired)
         {
             RiskOfOptions.ModSettingsManager.AddOption(
                 new StepSliderOption(
                     configEntry, 
-                    new StepSliderConfig() { min = min, max = max, increment = increment, checkIfDisabled = delegate () { return checkIfDisabled; } }
+                    new StepSliderConfig() { min = min, max = max, increment = increment, restartRequired = restartRequired, checkIfDisabled = delegate () { return checkIfDisabled(checkArtifact); } }
                     )
                 );
         }
 
-        public static void InvokeAddOptionCheckBox(ConfigEntry<bool> configEntry, bool checkIfDisabled) => InvokeAddOptionCheckBox(configEntry, checkIfDisabled, false);
-        public static void InvokeAddOptionCheckBox(ConfigEntry<bool> configEntry, bool checkIfDisabled, bool restartRequired)
+        public static void InvokeAddOptionCheckBox(ConfigEntry<bool> configEntry) => InvokeAddOptionCheckBox(configEntry, false, false);
+        public static void InvokeAddOptionCheckBox(ConfigEntry<bool> configEntry, bool checkArtifact) => InvokeAddOptionCheckBox(configEntry, checkArtifact, false);
+        public static void InvokeAddOptionCheckBox(ConfigEntry<bool> configEntry, bool checkArtifact, bool restartRequired)
         {
             RiskOfOptions.ModSettingsManager.AddOption(
                 new CheckBoxOption(
                     configEntry,
-                    new CheckBoxConfig() { checkIfDisabled = delegate () { return checkIfDisabled; } }
+                    new CheckBoxConfig() { restartRequired = restartRequired, checkIfDisabled = delegate () { return checkIfDisabled(checkArtifact); } }
                     )
                 );
+        }
+
+        public static bool checkIfDisabled(bool checkArtifact = false)
+        {
+            return (RoR2.Run.instance != null | (checkArtifact & BepConfig.EnableArtifact.Value == 0f));
         }
 
         public static void InvokeSetModIcon(UnityEngine.Sprite iconSprite)

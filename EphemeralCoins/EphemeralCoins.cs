@@ -12,7 +12,7 @@ namespace EphemeralCoins
     [NetworkCompatibility(CompatibilityLevel.EveryoneMustHaveMod, VersionStrictness.EveryoneNeedSameModVersion)]
     [BepInDependency("com.KingEnderBrine.ProperSave", BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency("com.rune580.riskofoptions", BepInDependency.DependencyFlags.SoftDependency)]
-    [BepInPlugin("com.Varna.EphemeralCoins", "Ephemeral_Coins", "2.2.1")]
+    [BepInPlugin("com.Varna.EphemeralCoins", "Ephemeral_Coins", "2.2.2")]
     public class EphemeralCoins : BaseUnityPlugin
     {
         public int numTimesRerolled;
@@ -27,7 +27,7 @@ namespace EphemeralCoins
         public bool artifactEnabled {
             get
             {
-                return BepConfig.EnableArtifact.Value == 2f || RunArtifactManager.instance.IsArtifactEnabled(Assets.NewMoonArtifact);
+                return BepConfig.EnableArtifact.Value == 2f | RunArtifactManager.instance.IsArtifactEnabled(Assets.NewMoonArtifact);
             }
         }
         

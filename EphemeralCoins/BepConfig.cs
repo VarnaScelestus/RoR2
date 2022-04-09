@@ -64,7 +64,7 @@ namespace EphemeralCoins
 
             if ( RiskOfOptionsCompatibility.enabled ) {
 
-                RiskOfOptionsCompatibility.InvokeAddOptionStepSlider(EnableArtifact, 0, 2, 1f, (Run.instance != null), true);
+                RiskOfOptionsCompatibility.InvokeAddOptionStepSlider(EnableArtifact, 0, 2, 1f, false, true);
 
                 /* Event to dynamically add/remove the artifact from the selectable pool. Needs more research
                 EnableArtifact.SettingChanged += (object sender, EventArgs e) => {
@@ -81,21 +81,21 @@ namespace EphemeralCoins
                 };
                 */
 
-                RiskOfOptionsCompatibility.InvokeAddOptionStepSlider(StartingCoins, 0, 100, 1f, (Run.instance != null || EnableArtifact.Value == 0f));
-                RiskOfOptionsCompatibility.InvokeAddOptionStepSlider(DropChance, 0, 100, 0.5f, (Run.instance != null));
-                RiskOfOptionsCompatibility.InvokeAddOptionStepSlider(DropMulti, 0, 1, 0.01f, (Run.instance != null));
-                RiskOfOptionsCompatibility.InvokeAddOptionStepSlider(DropMin, 0, 100, 0.5f, (Run.instance != null));
-                RiskOfOptionsCompatibility.InvokeAddOptionStepSlider(PodCost, 0, 10, 1f, (Run.instance != null));
-                RiskOfOptionsCompatibility.InvokeAddOptionStepSlider(PortalChance, 0, 1, 0.01f, (Run.instance != null));
-                RiskOfOptionsCompatibility.InvokeAddOptionCheckBox(PortalScale, (Run.instance != null));
-                RiskOfOptionsCompatibility.InvokeAddOptionStepSlider(FrogCost, 0, 10, 1f, (Run.instance != null));
-                RiskOfOptionsCompatibility.InvokeAddOptionStepSlider(FrogPets, 0, 20, 1f, (Run.instance != null));
-                RiskOfOptionsCompatibility.InvokeAddOptionStepSlider(ShopCost, 0, 10, 1f, (Run.instance != null));
-                RiskOfOptionsCompatibility.InvokeAddOptionCheckBox(ShopRefresh, (Run.instance != null));
-                RiskOfOptionsCompatibility.InvokeAddOptionStepSlider(SeerCost, 0, 10, 1f, (Run.instance != null));
-                RiskOfOptionsCompatibility.InvokeAddOptionStepSlider(RerollCost, 0, 10, 1f, (Run.instance != null));
-                RiskOfOptionsCompatibility.InvokeAddOptionStepSlider(RerollAmount, 0, 10, 1f, (Run.instance != null));
-                RiskOfOptionsCompatibility.InvokeAddOptionStepSlider(RerollScale, 0, 10, 1f, (Run.instance != null));
+                RiskOfOptionsCompatibility.InvokeAddOptionStepSlider(StartingCoins, 0, 100, 1f, true);
+                RiskOfOptionsCompatibility.InvokeAddOptionStepSlider(DropChance, 0, 100, 0.5f);
+                RiskOfOptionsCompatibility.InvokeAddOptionStepSlider(DropMulti, 0, 1, 0.01f);
+                RiskOfOptionsCompatibility.InvokeAddOptionStepSlider(DropMin, 0, 100, 0.5f);
+                RiskOfOptionsCompatibility.InvokeAddOptionStepSlider(PodCost, 0, 10, 1f);
+                RiskOfOptionsCompatibility.InvokeAddOptionStepSlider(PortalChance, 0, 1, 0.01f);
+                RiskOfOptionsCompatibility.InvokeAddOptionCheckBox(PortalScale);
+                RiskOfOptionsCompatibility.InvokeAddOptionStepSlider(FrogCost, 0, 10, 1f);
+                RiskOfOptionsCompatibility.InvokeAddOptionStepSlider(FrogPets, 0, 20, 1f);
+                RiskOfOptionsCompatibility.InvokeAddOptionStepSlider(ShopCost, 0, 10, 1f);
+                RiskOfOptionsCompatibility.InvokeAddOptionCheckBox(ShopRefresh);
+                RiskOfOptionsCompatibility.InvokeAddOptionStepSlider(SeerCost, 0, 10, 1f);
+                RiskOfOptionsCompatibility.InvokeAddOptionStepSlider(RerollCost, 0, 10, 1f);
+                RiskOfOptionsCompatibility.InvokeAddOptionStepSlider(RerollAmount, 0, 10, 1f);
+                RiskOfOptionsCompatibility.InvokeAddOptionStepSlider(RerollScale, 0, 10, 1f);
 
                 RiskOfOptionsCompatibility.InvokeSetModIcon(Assets.mainBundle.LoadAsset<Sprite>("texArtifactNewMoonEnabled"));
 

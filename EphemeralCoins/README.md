@@ -23,7 +23,6 @@ Provides settings to control various aspects relating to Lunar Coins, including 
 ## Todo
 
 - Re-implement [ProperSave](https://thunderstore.io/package/KingEnderBrine/ProperSave/) compatibility.
-- [Risk of Options](https://thunderstore.io/package/Rune580/Risk_Of_Options/) menu options don't disable properly when in a run. Change at your peril.
 
 ## Credits
 
@@ -32,6 +31,8 @@ Provides settings to control various aspects relating to Lunar Coins, including 
 [RoR2 modding discord](https://discord.gg/5MbXZvd) - For help in figuring out the Slab (Lunar Reroller)'s horrible, horrible internal structure, and just being awesome in general!
 
 ## Changelog
+
+2.2.2 - Hopefully the last fix for [Risk of Options](https://thunderstore.io/package/Rune580/Risk_Of_Options/) integration. Minor tweak to try and address multiplayer sync issues.
 
 2.2.1 - Small fix for [Risk of Options](https://thunderstore.io/package/Rune580/Risk_Of_Options/) integration. Yes, again.
 

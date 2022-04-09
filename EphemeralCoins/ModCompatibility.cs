@@ -1,4 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
+using BepInEx.Configuration;
+using RiskOfOptions.OptionConfigs;
+using RiskOfOptions.Options;
 
 namespace EphemeralCoins
 {
@@ -39,5 +42,38 @@ namespace EphemeralCoins
                 return (bool)_enabled;
             }
         }
+
+        public static void InvokeAddOptionStepSlider(ConfigEntry<float> configEntry, int min, int max, float increment, bool checkIfDisabled) => InvokeAddOptionStepSlider(configEntry, min, max, increment, checkIfDisabled, false);
+        public static void InvokeAddOptionStepSlider(ConfigEntry<float> configEntry, int min, int max, float increment, bool checkIfDisabled, bool restartRequired)
+        {
+            RiskOfOptions.ModSettingsManager.AddOption(
+                new StepSliderOption(
+                    configEntry, 
+                    new StepSliderConfig() { min = min, max = max, increment = increment, checkIfDisabled = delegate () { return checkIfDisabled; } }
+                    )
+                );
+        }
+
+        public static void InvokeAddOptionCheckBox(ConfigEntry<bool> configEntry, bool checkIfDisabled) => InvokeAddOptionCheckBox(configEntry, checkIfDisabled, false);
+        public static void InvokeAddOptionCheckBox(ConfigEntry<bool> configEntry, bool checkIfDisabled, bool restartRequired)
+        {
+            RiskOfOptions.ModSettingsManager.AddOption(
+                new CheckBoxOption(
+                    configEntry,
+                    new CheckBoxConfig() { checkIfDisabled = delegate () { return checkIfDisabled; } }
+                    )
+                );
+        }
+
+        public static void InvokeSetModIcon(UnityEngine.Sprite iconSprite)
+        {
+            RiskOfOptions.ModSettingsManager.SetModIcon(iconSprite);
+        }
+
+        public static void InvokeSetModDescription(string desc)
+        {
+            RiskOfOptions.ModSettingsManager.SetModDescription(desc);
+        }
+
     }
 }

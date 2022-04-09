@@ -3,7 +3,6 @@ using R2API.Utils;
 using RoR2;
 using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 
@@ -13,7 +12,7 @@ namespace EphemeralCoins
     [NetworkCompatibility(CompatibilityLevel.EveryoneMustHaveMod, VersionStrictness.EveryoneNeedSameModVersion)]
     [BepInDependency("com.KingEnderBrine.ProperSave", BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency("com.rune580.riskofoptions", BepInDependency.DependencyFlags.SoftDependency)]
-    [BepInPlugin("com.Varna.EphemeralCoins", "Ephemeral_Coins", "2.2.0")]
+    [BepInPlugin("com.Varna.EphemeralCoins", "Ephemeral_Coins", "2.2.1")]
     public class EphemeralCoins : BaseUnityPlugin
     {
         public int numTimesRerolled;

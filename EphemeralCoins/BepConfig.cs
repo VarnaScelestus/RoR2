@@ -1,11 +1,7 @@
 ﻿using BepInEx.Configuration;
 using RoR2;
-using RiskOfOptions;
-using RiskOfOptions.Options;
-using RiskOfOptions.OptionConfigs;
 using UnityEngine;
 using R2API;
-using System;
 
 namespace EphemeralCoins
 {
@@ -67,7 +63,8 @@ namespace EphemeralCoins
             if (BepConfig.EnableArtifact.Value == 1f) ContentAddition.AddArtifactDef(Assets.NewMoonArtifact);
 
             if ( RiskOfOptionsCompatibility.enabled ) {
-                ModSettingsManager.AddOption(new StepSliderOption(EnableArtifact, new StepSliderConfig() { min = 0, max = 2, increment = 1f, restartRequired = true, checkIfDisabled = delegate () { return (Run.instance != null); } }));
+
+                RiskOfOptionsCompatibility.InvokeAddOptionStepSlider(EnableArtifact, 0, 2, 1f, (Run.instance != null), true);
 
                 /* Event to dynamically add/remove the artifact from the selectable pool. Needs more research
                 EnableArtifact.SettingChanged += (object sender, EventArgs e) => {
@@ -84,23 +81,25 @@ namespace EphemeralCoins
                 };
                 */
 
-                ModSettingsManager.AddOption(new StepSliderOption(StartingCoins, new StepSliderConfig() { min = 0, max = 100, increment = 1f, checkIfDisabled = delegate () { return (Run.instance != null || EnableArtifact.Value == 0f); } }));
-                ModSettingsManager.AddOption(new StepSliderOption(DropChance, new StepSliderConfig() { min = 0, max = 100, increment = 0.1f, checkIfDisabled = delegate () { return (Run.instance != null); } }));
-                ModSettingsManager.AddOption(new StepSliderOption(DropMulti, new StepSliderConfig() { min = 0, max = 1, increment = 0.01f, checkIfDisabled = delegate () { return (Run.instance != null); } }));
-                ModSettingsManager.AddOption(new StepSliderOption(DropMin, new StepSliderConfig() { min = 0, max = 100, increment = 0.01f, checkIfDisabled = delegate () { return (Run.instance != null); } }));
-                ModSettingsManager.AddOption(new StepSliderOption(PodCost, new StepSliderConfig() { min = 0, max = 100, increment = 1f, checkIfDisabled = delegate () { return (Run.instance != null); } }));
-                ModSettingsManager.AddOption(new StepSliderOption(PortalChance, new StepSliderConfig() { min = 0, max = 100, increment = 0.1f, checkIfDisabled = delegate () { return (Run.instance != null); } }));
-                ModSettingsManager.AddOption(new CheckBoxOption(PortalScale, new CheckBoxConfig() { checkIfDisabled = delegate () { return (Run.instance != null); } }));
-                ModSettingsManager.AddOption(new StepSliderOption(FrogCost, new StepSliderConfig() { min = 0, max = 100, increment = 1f, checkIfDisabled = delegate () { return (Run.instance != null); } }));
-                ModSettingsManager.AddOption(new StepSliderOption(FrogPets, new StepSliderConfig() { min = 0, max = 100, increment = 1f, checkIfDisabled = delegate () { return (Run.instance != null); } }));
-                ModSettingsManager.AddOption(new StepSliderOption(ShopCost, new StepSliderConfig() { min = 0, max = 100, increment = 1f, checkIfDisabled = delegate () { return (Run.instance != null); } }));
-                ModSettingsManager.AddOption(new CheckBoxOption(ShopRefresh, new CheckBoxConfig() { checkIfDisabled = delegate () { return (Run.instance != null); } }));
-                ModSettingsManager.AddOption(new StepSliderOption(SeerCost, new StepSliderConfig() { min = 0, max = 100, increment = 1f, checkIfDisabled = delegate () { return (Run.instance != null); } }));
-                ModSettingsManager.AddOption(new StepSliderOption(RerollCost, new StepSliderConfig() { min = 0, max = 100, increment = 1f, checkIfDisabled = delegate () { return (Run.instance != null); } }));
-                ModSettingsManager.AddOption(new StepSliderOption(RerollAmount, new StepSliderConfig() { min = 0, max = 100, increment = 1f, checkIfDisabled = delegate () { return (Run.instance != null); } }));
-                ModSettingsManager.AddOption(new StepSliderOption(RerollScale, new StepSliderConfig() { min = 0, max = 100, increment = 1f, checkIfDisabled = delegate () { return (Run.instance != null); } }));
-                ModSettingsManager.SetModIcon(Assets.mainBundle.LoadAsset<Sprite>("texArtifactNewMoonEnabled"));
-                ModSettingsManager.SetModDescription(
+                RiskOfOptionsCompatibility.InvokeAddOptionStepSlider(StartingCoins, 0, 100, 1f, (Run.instance != null || EnableArtifact.Value == 0f));
+                RiskOfOptionsCompatibility.InvokeAddOptionStepSlider(DropChance, 0, 100, 0.5f, (Run.instance != null));
+                RiskOfOptionsCompatibility.InvokeAddOptionStepSlider(DropMulti, 0, 1, 0.01f, (Run.instance != null));
+                RiskOfOptionsCompatibility.InvokeAddOptionStepSlider(DropMin, 0, 100, 0.5f, (Run.instance != null));
+                RiskOfOptionsCompatibility.InvokeAddOptionStepSlider(PodCost, 0, 10, 1f, (Run.instance != null));
+                RiskOfOptionsCompatibility.InvokeAddOptionStepSlider(PortalChance, 0, 1, 0.01f, (Run.instance != null));
+                RiskOfOptionsCompatibility.InvokeAddOptionCheckBox(PortalScale, (Run.instance != null));
+                RiskOfOptionsCompatibility.InvokeAddOptionStepSlider(FrogCost, 0, 10, 1f, (Run.instance != null));
+                RiskOfOptionsCompatibility.InvokeAddOptionStepSlider(FrogPets, 0, 20, 1f, (Run.instance != null));
+                RiskOfOptionsCompatibility.InvokeAddOptionStepSlider(ShopCost, 0, 10, 1f, (Run.instance != null));
+                RiskOfOptionsCompatibility.InvokeAddOptionCheckBox(ShopRefresh, (Run.instance != null));
+                RiskOfOptionsCompatibility.InvokeAddOptionStepSlider(SeerCost, 0, 10, 1f, (Run.instance != null));
+                RiskOfOptionsCompatibility.InvokeAddOptionStepSlider(RerollCost, 0, 10, 1f, (Run.instance != null));
+                RiskOfOptionsCompatibility.InvokeAddOptionStepSlider(RerollAmount, 0, 10, 1f, (Run.instance != null));
+                RiskOfOptionsCompatibility.InvokeAddOptionStepSlider(RerollScale, 0, 10, 1f, (Run.instance != null));
+
+                RiskOfOptionsCompatibility.InvokeSetModIcon(Assets.mainBundle.LoadAsset<Sprite>("texArtifactNewMoonEnabled"));
+
+                RiskOfOptionsCompatibility.InvokeSetModDescription(
                     "<size=200%><uppercase><align=center><color=#adf2fa>Ephemeral Coins</color></align></uppercase></size>"
                     + "\n<size=80%>Provides settings to control various aspects relating to Lunar Coins, including an Artifact that replaces them with temporary, per-run fascimiles that do not affect your save file's coin count. Almost all settings are independant and can be used with or without the Artifact.</size>"
                     + "\n\n<b><color=#CECE00>### WARNING ###\nSettings cannot be changed during a run.\nIn multiplayer, if your settings differ from the host, there may be errors (UNTESTED)!</color></b>"

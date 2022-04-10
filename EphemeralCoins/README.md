@@ -32,6 +32,8 @@ Provides settings to control various aspects relating to Lunar Coins, including 
 
 ## Changelog
 
+2.3.0 - Rewrote networking code for syncing coin counts, and cleaned up code surrounding the artifact (it now enables/disables its functions more like vanilla artifacts do).
+
 2.2.2 - Hopefully the last fix for [Risk of Options](https://thunderstore.io/package/Rune580/Risk_Of_Options/) integration. Minor tweak to try and address multiplayer sync issues.
 
 2.2.1 - Small fix for [Risk of Options](https://thunderstore.io/package/Rune580/Risk_Of_Options/) integration. Yes, again.

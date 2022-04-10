@@ -1,49 +1,45 @@
 ﻿using BepInEx;
+using R2API.Networking;
+using R2API.Networking.Interfaces;
 using R2API.Utils;
 using RoR2;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.AddressableAssets;
 
 namespace EphemeralCoins
 {
     [BepInDependency(R2API.R2API.PluginGUID, R2API.R2API.PluginVersion)]
+    [R2APISubmoduleDependency(nameof(NetworkingAPI))]
     [NetworkCompatibility(CompatibilityLevel.EveryoneMustHaveMod, VersionStrictness.EveryoneNeedSameModVersion)]
     [BepInDependency("com.KingEnderBrine.ProperSave", BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency("com.rune580.riskofoptions", BepInDependency.DependencyFlags.SoftDependency)]
-    [BepInPlugin("com.Varna.EphemeralCoins", "Ephemeral_Coins", "2.2.2")]
+    [BepInPlugin("com.Varna.EphemeralCoins", "Ephemeral_Coins", "2.3.0")]
     public class EphemeralCoins : BaseUnityPlugin
     {
         public int numTimesRerolled;
-
-        public class CoinStorage
-        {
-            public NetworkUser user;
-            public uint ephemeralCoinCount;
-        }
         public List<CoinStorage> coinCounts = new List<CoinStorage>();
 
         public bool artifactEnabled {
             get
             {
-                return BepConfig.EnableArtifact.Value == 2f | RunArtifactManager.instance.IsArtifactEnabled(Assets.NewMoonArtifact);
+                return BepConfig.EnableArtifact.Value == 2f || (RunArtifactManager.instance && RunArtifactManager.instance.IsArtifactEnabled(Assets.NewMoonArtifact));
             }
         }
         
-        //public int ephemeralCoinCount;
-
         public static PluginInfo PInfo { get; private set; }
         public static EphemeralCoins instance;
 
-        public void Awake() //might have to change to Start()?
+        public static new BepInEx.Logging.ManualLogSource Logger;
+
+        public void Awake()
         {
             PInfo = Info;
             instance = this;
+            Logger = base.Logger;
 
             //internal counters
             numTimesRerolled = 0;
-            //ephemeralCoinCount = 0;
 
             //cost override
             RoR2Application.onLoad += AddCostType;
@@ -51,6 +47,11 @@ namespace EphemeralCoins
             Assets.Init();
             BepConfig.Init();
             Hooks.Init();
+
+            //do prefabsetup for 'always on' functionality
+            if (artifactEnabled) NewMoonArtifactManager.PrefabSetup(true);
+
+            NetworkingAPI.RegisterMessageType<SyncCoinStorage>();
 
             //Utterly broken, fix later
             //if (ProperSaveCompatibility.enabled) ProperSaveSetup();
@@ -62,10 +63,10 @@ namespace EphemeralCoins
         public void SetupCoinStorage(List<CoinStorage> coinStorage, bool NewRun = true)
         {
             if (NewRun) coinStorage.Clear();
-            foreach (PlayerCharacterMasterController playerCharacterMaster in PlayerCharacterMasterController.instances)
+            foreach (NetworkUser user in NetworkUser.readOnlyInstancesList)
             {
                 // Skipping over Disconnected Players.
-                if (coinStorage != null && playerCharacterMaster.networkUser == null)
+                if (coinStorage != null && user == null)
                 {
                     Logger.LogInfo("A player disconnected! Skipping over what remains of them...");
                     continue;
@@ -74,11 +75,10 @@ namespace EphemeralCoins
                 // If this is ran mid-stage, just skip over existing players and add anybody who joined.
                 if (!NewRun && coinStorage != null)
                 {
-                    // Skipping over players that are already in the game.
                     bool flag = false;
                     foreach (CoinStorage player in coinStorage)
                     {
-                        if (player.user == playerCharacterMaster.networkUser)
+                        if (player.user.Equals(user.id))
                         {
                             flag = true;
                             break;
@@ -87,10 +87,12 @@ namespace EphemeralCoins
                     if (flag) continue;
                 }
                 CoinStorage newPlayer = new CoinStorage();
-                if (playerCharacterMaster.networkUser) newPlayer.user = playerCharacterMaster.networkUser;
+                newPlayer.user = user.Network_masterObjectId;
+                newPlayer.name = user.userName;
                 newPlayer.ephemeralCoinCount = 0;
                 coinStorage.Add(newPlayer);
-                Logger.LogInfo(newPlayer.user.userName + " added to CoinStorage!");
+                Logger.LogInfo(newPlayer.name + " added to CoinStorage!");
+                new SyncCoinStorage(newPlayer.user, newPlayer.name, 0).Send(NetworkDestination.Clients);
             }
             Logger.LogInfo("Setting up CoinStorage finished.");
         }
@@ -99,7 +101,7 @@ namespace EphemeralCoins
         {
             foreach (CoinStorage player in coinCounts)
             {
-                if (player.user == user)
+                if (player.user.Equals(user.Network_masterObjectId))
                 {
                     player.ephemeralCoinCount += count;
                     Logger.LogInfo("giveCoinsToUser: " + user.userName + " " + count);
@@ -111,7 +113,7 @@ namespace EphemeralCoins
         {
             foreach (CoinStorage player in coinCounts)
             {
-                if (player.user == user)
+                if (player.user.Equals(user.Network_masterObjectId))
                 {
                     player.ephemeralCoinCount -= count;
                     Logger.LogInfo("takeCoinsFromUser: " + user.userName + " " + count);
@@ -123,7 +125,7 @@ namespace EphemeralCoins
         {
             foreach (CoinStorage player in coinCounts)
             {
-                if (player.user == user)
+                if (player.user.Equals(user.Network_masterObjectId))
                 {
                     //Spams the console due to HUD hook, only used for debugging.
                     //Logger.LogInfo("getCoinsFromUser: " + user.userName + player.ephemeralCoinCount);
@@ -149,7 +151,7 @@ namespace EphemeralCoins
                     if (artifactEnabled) {
                         foreach (CoinStorage player in coinCounts)
                         {
-                            if (player.user == networkUser2)
+                            if (player.user.Equals(networkUser2.Network_masterObjectId))
                             {
                                 return player.ephemeralCoinCount >= context.cost;
                             }
@@ -170,94 +172,6 @@ namespace EphemeralCoins
             };
 
             CostTypeCatalog.Register(CostTypeIndex.LunarCoin, newdef);
-        }
-
-        public void RunStartPrefabSetup(bool set = false)
-        {
-            ///
-            /// Swap the Lunar Coin's model and pickup settings around based on whether the artifact is enabled.
-            ///
-            //Text stuff
-            PickupDef TheCoinDef = PickupCatalog.FindPickupIndex("LunarCoin.Coin0").pickupDef;
-            TheCoinDef.nameToken = set ? "Ephemeral Coin" : "PICKUP_LUNAR_COIN";
-            TheCoinDef.interactContextToken = set ? "Pick up Ephemeral Coin" : "LUNAR_COIN_PICKUP_CONTEXT";
-
-            //Outline color
-            TheCoinDef.baseColor = set ? new Color32(96, 254, byte.MaxValue, byte.MaxValue) : new Color32(48, 127, byte.MaxValue, byte.MaxValue);
-
-            //Chatbox color
-            TheCoinDef.darkColor = set ? new Color32(152, 168, byte.MaxValue, byte.MaxValue) : new Color32(76, 84, 144, byte.MaxValue);
-
-            //Filling our Lunar Coin's hole.
-            GameObject TheCoin = Addressables.LoadAssetAsync<GameObject>("RoR2/Base/LunarCoin/PickupLunarCoin.prefab").WaitForCompletion();
-            TheCoin.transform.Find("Coin5Mesh").GetComponent<MeshFilter>().mesh = set ?
-                Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Common/VFX/mdlLunarCoin.fbx").WaitForCompletion().GetComponent<MeshFilter>().mesh
-                :
-                Addressables.LoadAssetAsync<GameObject>("RoR2/Base/Common/VFX/mdlLunarCoinWithHole.fbx").WaitForCompletion().GetComponent<MeshFilter>().mesh;
-
-            //Changing the material used for rendering, so we can have a semi-transparent effect. Hopoo's standard shader doesn't do transparency I guess???
-            TheCoin.transform.Find("Coin5Mesh").GetComponent<MeshRenderer>().material = set ? Assets.mainBundle.LoadAsset<Material>("matEphemeralCoin") : Addressables.LoadAssetAsync<Material>("RoR2/Base/Common/VFX/matLunarCoinPlaceholder.mat").WaitForCompletion();
-
-            /// Model tint
-            /// Swapping the material directly (above) instead of modifying it here.
-            //Material TheCoinMaterial = Addressables.LoadAssetAsync<Material>("RoR2/Base/Common/VFX/matLunarCoinPlaceholder.mat").WaitForCompletion();
-            //TheCoinMaterial.SetColor("_Color", set ? new Color32(100, 220, 250, byte.MaxValue) : new Color32(198, 173, 250, byte.MaxValue));
-            //TheCoinMaterial.SetTexture("_MainTex", set ? Assets.mainBundle.LoadAsset<Texture2D>("texEphemeralCoinDiffuse") : Addressables.LoadAssetAsync<Texture2D>("RoR2/Base/Common/VFX/texLunarCoinDiffuse.png").WaitForCompletion());
-
-            /// Transparency
-            /// Can't actually touch the textures in memory because of RoR2's unity import settings.
-            /// Solved by changing the texture instead. Kept this snippet for educational purposes.
-            /*Texture2D TheCoinDiffuse = Addressables.LoadAssetAsync<Texture2D>("RoR2/Base/Common/VFX/texLunarCoinDiffuse.png").WaitForCompletion();
-            Color[] d = TheCoinDiffuse.GetPixels();
-            foreach (Color p in d)
-            {
-                p.SetFieldValue("a", set ? 0.5f : 1f);
-            }
-            TheCoinDiffuse.SetPixels(d);
-            */
-
-            ///
-            /// Changing the interactable costs.
-            ///
-            /// Only the LunarChest (pods) and FrogInteractable (moonfrog) actually do anything here, because Bazaar is full of pre-loaded instances of the prefabs.
-            /// Still change the other prefabs anyway, just in case Hopoo decides to change something down the line.
-            /// The Seer Stations will always require hooks, because their scripts set their price at runtime. Why? Ask Hopoo.
-            foreach (string x in Assets.lunarInteractables)
-            {
-                GameObject z = Addressables.LoadAssetAsync<GameObject>(x).WaitForCompletion();
-                int zValue = 0;
-
-                switch (z.name)
-                {
-                    case "LunarRecycler":
-                        zValue = (int)BepConfig.RerollCost.Value;
-                        //Debug.Log("EphemeralCoins PrefabSetup LunarRecycler " + zValue);
-                        break;
-                    case "LunarChest":
-                        zValue = (int)BepConfig.PodCost.Value;
-                        //Debug.Log("EphemeralCoins PrefabSetup LunarChest " + zValue);
-                        break;
-                    case "LunarShopTerminal":
-                        zValue = (int)BepConfig.ShopCost.Value;
-                        //Debug.Log("EphemeralCoins PrefabSetup LunarShopTerminal " + zValue);
-                        break;
-                    case "SeerStation":
-                        zValue = (int)BepConfig.SeerCost.Value;
-                        //Debug.Log("EphemeralCoins PrefabSetup SeerStation " + zValue);
-                        break;
-                    case "FrogInteractable":
-                        zValue = (int)BepConfig.FrogCost.Value;
-                        z.GetComponent<FrogController>().maxPets = (int)BepConfig.FrogPets.Value;
-                        //Debug.Log("EphemeralCoins PrefabSetup FrogInteractable " + zValue);
-                        break;
-                    default:
-                        Debug.LogWarning("EphemeralCoins: Unknown lunarInteractable " + x + ", will default to 0 cost!");
-                        break;
-                }
-
-                z.GetComponent<PurchaseInteraction>().Networkcost = zValue;
-                if (zValue == 0) { z.GetComponent<PurchaseInteraction>().costType = CostTypeIndex.None; }
-            }
         }
 
         /*

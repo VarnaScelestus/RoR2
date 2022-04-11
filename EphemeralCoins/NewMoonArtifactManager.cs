@@ -20,22 +20,31 @@ namespace EphemeralCoins
 		{
 			if (!(artifactDef != myArtifact))
 			{
-                //hooksource += hook
-                PrefabSetup(true);
+                On.RoR2.Run.Start += Run_Start;
 			}
 		}
 
-		private static void OnArtifactDisabled(RunArtifactManager runArtifactManager, ArtifactDef artifactDef)
+        private static void Run_Start(On.RoR2.Run.orig_Start orig, Run self)
+        {
+            EphemeralCoins.Logger.LogDebug("Artifact enabled");
+            PrefabSetup(true);
+            orig(self);
+        }
+
+        private static void OnArtifactDisabled(RunArtifactManager runArtifactManager, ArtifactDef artifactDef)
 		{
 			if (!(artifactDef != myArtifact))
 			{
-                //hooksource -= hook
+                On.RoR2.Run.Start -= Run_Start;
+                EphemeralCoins.Logger.LogDebug("Artifact disabled");
                 PrefabSetup(false);
             }
 		}
 
         public static void PrefabSetup(bool set = false)
         {
+            EphemeralCoins.Logger.LogDebug("PrefabSetup " + set);
+
             ///
             /// Swap the Lunar Coin's model and pickup settings around based on whether the artifact is enabled.
             ///

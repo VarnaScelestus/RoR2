@@ -14,7 +14,7 @@ namespace EphemeralCoins
     [NetworkCompatibility(CompatibilityLevel.EveryoneMustHaveMod, VersionStrictness.EveryoneNeedSameModVersion)]
     [BepInDependency("com.KingEnderBrine.ProperSave", BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency("com.rune580.riskofoptions", BepInDependency.DependencyFlags.SoftDependency)]
-    [BepInPlugin("com.Varna.EphemeralCoins", "Ephemeral_Coins", "2.3.0")]
+    [BepInPlugin("com.Varna.EphemeralCoins", "Ephemeral_Coins", "2.3.1")]
     public class EphemeralCoins : BaseUnityPlugin
     {
         public int numTimesRerolled;
@@ -43,13 +43,11 @@ namespace EphemeralCoins
 
             //cost override
             RoR2Application.onLoad += AddCostType;
+            RoR2Application.onLoad += AlwaysOnMode;
 
             Assets.Init();
             BepConfig.Init();
             Hooks.Init();
-
-            //do prefabsetup for 'always on' functionality
-            if (artifactEnabled) NewMoonArtifactManager.PrefabSetup(true);
 
             NetworkingAPI.RegisterMessageType<SyncCoinStorage>();
 
@@ -68,7 +66,7 @@ namespace EphemeralCoins
                 // Skipping over Disconnected Players.
                 if (coinStorage != null && user == null)
                 {
-                    Logger.LogInfo("A player disconnected! Skipping over what remains of them...");
+                    Logger.LogDebug("A player disconnected! Skipping over what remains of them...");
                     continue;
                 }
 
@@ -91,10 +89,10 @@ namespace EphemeralCoins
                 newPlayer.name = user.userName;
                 newPlayer.ephemeralCoinCount = 0;
                 coinStorage.Add(newPlayer);
-                Logger.LogInfo(newPlayer.name + " added to CoinStorage!");
+                Logger.LogDebug(newPlayer.name + " added to CoinStorage!");
                 new SyncCoinStorage(newPlayer.user, newPlayer.name, 0).Send(NetworkDestination.Clients);
             }
-            Logger.LogInfo("Setting up CoinStorage finished.");
+            Logger.LogDebug("Setting up CoinStorage finished.");
         }
 
         public void giveCoinsToUser(NetworkUser user, uint count)
@@ -104,7 +102,7 @@ namespace EphemeralCoins
                 if (player.user.Equals(user.Network_masterObjectId))
                 {
                     player.ephemeralCoinCount += count;
-                    Logger.LogInfo("giveCoinsToUser: " + user.userName + " " + count);
+                    Logger.LogDebug("giveCoinsToUser: " + user.userName + " " + count);
                 }
             }
         }
@@ -116,20 +114,22 @@ namespace EphemeralCoins
                 if (player.user.Equals(user.Network_masterObjectId))
                 {
                     player.ephemeralCoinCount -= count;
-                    Logger.LogInfo("takeCoinsFromUser: " + user.userName + " " + count);
+                    Logger.LogDebug("takeCoinsFromUser: " + user.userName + " " + count);
                 }
             }
         }
 
         public uint getCoinsFromUser(NetworkUser user)
         {
-            foreach (CoinStorage player in coinCounts)
-            {
-                if (player.user.Equals(user.Network_masterObjectId))
+            if (Run.instance != null) {
+                foreach (CoinStorage player in coinCounts)
                 {
-                    //Spams the console due to HUD hook, only used for debugging.
-                    //Logger.LogInfo("getCoinsFromUser: " + user.userName + player.ephemeralCoinCount);
-                    return player.ephemeralCoinCount;
+                    if (player.user.Equals(user.Network_masterObjectId))
+                    {
+                        //Spams the console due to HUD hook, only used for debugging.
+                        //Logger.LogDebug("getCoinsFromUser: " + user.userName + player.ephemeralCoinCount);
+                        return player.ephemeralCoinCount;
+                    }
                 }
             }
             return 0;
@@ -172,6 +172,16 @@ namespace EphemeralCoins
             };
 
             CostTypeCatalog.Register(CostTypeIndex.LunarCoin, newdef);
+        }
+
+        public void AlwaysOnMode()
+        {
+            //do prefabsetup for 'always on' functionality
+            if (artifactEnabled)
+            {
+                Logger.LogDebug("Artifact mode 2 (always on/hidden); setting up prefabs.");
+                NewMoonArtifactManager.PrefabSetup(true);
+            }
         }
 
         /*
@@ -225,12 +235,12 @@ namespace EphemeralCoins
             yield return new WaitForSeconds(3f);
             if (BepConfig.StartingCoins.Value > 0)
             {
+                Chat.SendBroadcastChat(new Chat.SimpleChatMessage
+                {
+                    baseToken = "<nobr><color=#adf2fa><sprite name=\"LunarCoin\" tint=1>" + BepConfig.StartingCoins.Value + "</color></nobr> " + (BepConfig.StartingCoins.Value > 1 ? "coins fade" : "coin fades") + " into existence..."
+                });
                 for (int i = 0; i < PlayerCharacterMasterController.instances.Count; i++)
                 {
-                    Chat.SendBroadcastChat(new Chat.SimpleChatMessage
-                    {
-                        baseToken = "<nobr><color=#adf2fa><sprite name=\"LunarCoin\" tint=1>" + BepConfig.StartingCoins.Value + "</color></nobr> " + (BepConfig.StartingCoins.Value > 1 ? "coins fade" : "coin fades") + " into existence..."
-                    });
                     PlayerCharacterMasterController.instances[i].networkUser.AwardLunarCoins((uint)BepConfig.StartingCoins.Value);
                 }
             }

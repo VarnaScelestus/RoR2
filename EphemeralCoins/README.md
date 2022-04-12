@@ -32,6 +32,8 @@ Provides settings to control various aspects relating to Lunar Coins, including 
 
 ## Changelog
 
+2.3.2 - Debug additions.
+
 2.3.1 - Bug fix for 'always on' mode not setting up properly, a small tweak to artifact logic that might address [#16](https://github.com/VarnaScelestus/RoR2/issues/16), fix for some NREs from the HUD hook when exiting a run, and a fix for the starting coins message occuring once for each player instead of just once.
 
 2.3.0 - Rewrote networking code for syncing coin counts, and cleaned up code surrounding the artifact (it now enables/disables its functions more like vanilla artifacts do).

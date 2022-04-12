@@ -7,19 +7,19 @@ namespace EphemeralCoins
 {
 	public static class NewMoonArtifactManager
 	{
-		private static ArtifactDef myArtifact => Assets.NewMoonArtifact;
-
 		[SystemInitializer(new Type[] { typeof(ArtifactCatalog) })]
 		private static void Init()
 		{
+            EphemeralCoins.Logger.LogDebug("NewMoonArtifactManager initialized");
             RunArtifactManager.onArtifactEnabledGlobal += OnArtifactEnabled;
             RunArtifactManager.onArtifactDisabledGlobal += OnArtifactDisabled;
         }
 
 		private static void OnArtifactEnabled(RunArtifactManager runArtifactManager, ArtifactDef artifactDef)
 		{
-			if (!(artifactDef != myArtifact))
+			if (!(artifactDef != Assets.NewMoonArtifact))
 			{
+                EphemeralCoins.Logger.LogDebug("OnArtifactEnabled hook applied");
                 On.RoR2.Run.Start += Run_Start;
 			}
 		}
@@ -33,7 +33,7 @@ namespace EphemeralCoins
 
         private static void OnArtifactDisabled(RunArtifactManager runArtifactManager, ArtifactDef artifactDef)
 		{
-			if (!(artifactDef != myArtifact))
+			if (!(artifactDef != Assets.NewMoonArtifact))
 			{
                 On.RoR2.Run.Start -= Run_Start;
                 EphemeralCoins.Logger.LogDebug("Artifact disabled");

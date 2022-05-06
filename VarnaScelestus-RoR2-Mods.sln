@@ -11,9 +11,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "libs", "libs", "{4088A12C-0
 		libs\ProperSave.dll = libs\ProperSave.dll
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RoR2", "..\RoR2 build 8331485\ILSpy decompile\RoR2.csproj", "{586C3F99-A4A8-4F16-A4C3-6EF421CD8BF5}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EphemeralCoins", "EphemeralCoins\EphemeralCoins.csproj", "{36A7F81D-B121-412C-9D88-96837A7C6F76}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SkinTest", "SkinTest\SkinTest.csproj", "{0541BF87-4328-4922-8D78-F22A3F4B1B0B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RoR2", "..\RoR2 build 8331485\ILSpy decompile\RoR2.csproj", "{0EE87944-7ED3-4E54-AF23-1C444D18D795}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AllTheTasques", "AllTheTasques\AllTheTasques.csproj", "{6300E19B-4384-449B-A444-E5A983A00BD2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -28,18 +32,30 @@ Global
 		{B491EA95-FB43-4BD6-9200-39D520BB4314}.DropInPlugins|Any CPU.Build.0 = Debug|Any CPU
 		{B491EA95-FB43-4BD6-9200-39D520BB4314}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B491EA95-FB43-4BD6-9200-39D520BB4314}.Release|Any CPU.Build.0 = Release|Any CPU
-		{586C3F99-A4A8-4F16-A4C3-6EF421CD8BF5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{586C3F99-A4A8-4F16-A4C3-6EF421CD8BF5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{586C3F99-A4A8-4F16-A4C3-6EF421CD8BF5}.DropInPlugins|Any CPU.ActiveCfg = Debug|Any CPU
-		{586C3F99-A4A8-4F16-A4C3-6EF421CD8BF5}.DropInPlugins|Any CPU.Build.0 = Debug|Any CPU
-		{586C3F99-A4A8-4F16-A4C3-6EF421CD8BF5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{586C3F99-A4A8-4F16-A4C3-6EF421CD8BF5}.Release|Any CPU.Build.0 = Release|Any CPU
 		{36A7F81D-B121-412C-9D88-96837A7C6F76}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{36A7F81D-B121-412C-9D88-96837A7C6F76}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{36A7F81D-B121-412C-9D88-96837A7C6F76}.DropInPlugins|Any CPU.ActiveCfg = Debug|Any CPU
 		{36A7F81D-B121-412C-9D88-96837A7C6F76}.DropInPlugins|Any CPU.Build.0 = Debug|Any CPU
 		{36A7F81D-B121-412C-9D88-96837A7C6F76}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{36A7F81D-B121-412C-9D88-96837A7C6F76}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0541BF87-4328-4922-8D78-F22A3F4B1B0B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0541BF87-4328-4922-8D78-F22A3F4B1B0B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0541BF87-4328-4922-8D78-F22A3F4B1B0B}.DropInPlugins|Any CPU.ActiveCfg = Debug|Any CPU
+		{0541BF87-4328-4922-8D78-F22A3F4B1B0B}.DropInPlugins|Any CPU.Build.0 = Debug|Any CPU
+		{0541BF87-4328-4922-8D78-F22A3F4B1B0B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0541BF87-4328-4922-8D78-F22A3F4B1B0B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0EE87944-7ED3-4E54-AF23-1C444D18D795}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0EE87944-7ED3-4E54-AF23-1C444D18D795}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0EE87944-7ED3-4E54-AF23-1C444D18D795}.DropInPlugins|Any CPU.ActiveCfg = Debug|Any CPU
+		{0EE87944-7ED3-4E54-AF23-1C444D18D795}.DropInPlugins|Any CPU.Build.0 = Debug|Any CPU
+		{0EE87944-7ED3-4E54-AF23-1C444D18D795}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0EE87944-7ED3-4E54-AF23-1C444D18D795}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6300E19B-4384-449B-A444-E5A983A00BD2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6300E19B-4384-449B-A444-E5A983A00BD2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6300E19B-4384-449B-A444-E5A983A00BD2}.DropInPlugins|Any CPU.ActiveCfg = Debug|Any CPU
+		{6300E19B-4384-449B-A444-E5A983A00BD2}.DropInPlugins|Any CPU.Build.0 = Debug|Any CPU
+		{6300E19B-4384-449B-A444-E5A983A00BD2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6300E19B-4384-449B-A444-E5A983A00BD2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

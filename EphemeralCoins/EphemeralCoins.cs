@@ -14,7 +14,7 @@ namespace EphemeralCoins
     [NetworkCompatibility(CompatibilityLevel.EveryoneMustHaveMod, VersionStrictness.EveryoneNeedSameModVersion)]
     [BepInDependency("com.KingEnderBrine.ProperSave", BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency("com.rune580.riskofoptions", BepInDependency.DependencyFlags.SoftDependency)]
-    [BepInPlugin("com.Varna.EphemeralCoins", "Ephemeral_Coins", "2.3.2")]
+    [BepInPlugin("com.Varna.EphemeralCoins", "Ephemeral_Coins", "2.3.3")]
     public class EphemeralCoins : BaseUnityPlugin
     {
         public int numTimesRerolled;

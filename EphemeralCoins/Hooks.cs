@@ -71,7 +71,7 @@ namespace EphemeralCoins
             if (EphemeralCoins.instance.artifactEnabled)
             {
                 self.lunarCoinText.targetValue = (int)EphemeralCoins.instance.getCoinsFromUser(self._localUserViewer.currentNetworkUser);
-                self.lunarCoinContainer.transform.Find("LunarCoinSign").GetComponent<RoR2.UI.HGTextMeshProUGUI>().text = "<sprite name=\"LunarCoin\" color=#adf2fa>";
+                if (self.lunarCoinContainer.transform.Find("LunarCoinSign") != null) self.lunarCoinContainer.transform.Find("LunarCoinSign").GetComponent<RoR2.UI.HGTextMeshProUGUI>().text = "<sprite name=\"LunarCoin\" color=#adf2fa>";
             }
         }
 

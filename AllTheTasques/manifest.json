@@ -1,0 +1,10 @@
+{
+    "name": "AllTheTasques",
+    "version_number": "1.0.0",
+    "website_url": "https://github.com/VarnaScelestus/RoR2",
+    "description": "Enable ALL NSFWTasque skins in character select.",
+    "dependencies": [
+      "bbepis-BepInExPack-5.4.1900",
+      "TheBreadMan-NSFWTasque-2.0.1"
+    ]
+}

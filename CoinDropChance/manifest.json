@@ -1,0 +1,10 @@
+{
+  "name": "Higher Coin Drop Chance",
+  "version_number": "1.0.0",
+  "website_url": "https://github.com/VarnaScelestus/RoR2",
+  "description": "Increases the drop chance of Lunar coins.",
+  "dependencies": [
+    "bbepis-BepInExPack-5.4.1900",
+    "tristanmcpherson-R2API-4.0.11"
+  ]
+}

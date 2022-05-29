@@ -1,4 +1,4 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.28803.156
@@ -18,6 +18,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RoR2", "..\RoR2 build 8331485\ILSpy decompile\RoR2.csproj", "{0EE87944-7ED3-4E54-AF23-1C444D18D795}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AllTheTasques", "AllTheTasques\AllTheTasques.csproj", "{6300E19B-4384-449B-A444-E5A983A00BD2}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoinDropChance", "CoinDropChance\CoinDropChance.csproj", "{5DA17F9A-B4C5-4CD1-940A-19DC7DE66588}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -56,6 +58,12 @@ Global
 		{6300E19B-4384-449B-A444-E5A983A00BD2}.DropInPlugins|Any CPU.Build.0 = Debug|Any CPU
 		{6300E19B-4384-449B-A444-E5A983A00BD2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6300E19B-4384-449B-A444-E5A983A00BD2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5DA17F9A-B4C5-4CD1-940A-19DC7DE66588}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5DA17F9A-B4C5-4CD1-940A-19DC7DE66588}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5DA17F9A-B4C5-4CD1-940A-19DC7DE66588}.DropInPlugins|Any CPU.ActiveCfg = Debug|Any CPU
+		{5DA17F9A-B4C5-4CD1-940A-19DC7DE66588}.DropInPlugins|Any CPU.Build.0 = Debug|Any CPU
+		{5DA17F9A-B4C5-4CD1-940A-19DC7DE66588}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5DA17F9A-B4C5-4CD1-940A-19DC7DE66588}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

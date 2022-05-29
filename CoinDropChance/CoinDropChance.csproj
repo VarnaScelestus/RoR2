@@ -1,0 +1,48 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <Version>2.3.3</Version>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="if &quot;$(Username)&quot; == &quot;Varna&quot; copy /Y &quot;$(TargetPath)&quot; &quot;C:\Users\rylun\Documents\Modding Projects\Risk of Rain 2\VarnaScelestus\CoinDropChance\plugins&quot;&#xD;&#xA;if &quot;$(Username)&quot; == &quot;Varna&quot; copy /Y &quot;$(ProjectDir)\UnityProject\AssetBundles\StandaloneWindows\CoinDropChance&quot; &quot;C:\Users\rylun\Documents\Modding Projects\Risk of Rain 2\VarnaScelestus\CoinDropChance\plugins\assetbundles&quot;&#xD;&#xA;if &quot;$(Username)&quot; == &quot;Varna&quot; mkdir &quot;C:\Users\rylun\AppData\Roaming\r2modmanPlus-local\RiskOfRain2\profiles\DevTest\BepInEx\plugins\123DEVTEST-CoinDropChance&quot;&#xD;&#xA;if &quot;$(Username)&quot; == &quot;Varna&quot; mkdir &quot;C:\Users\rylun\AppData\Roaming\r2modmanPlus-local\RiskOfRain2\profiles\DevTest\BepInEx\plugins\123DEVTEST-CoinDropChance\assetbundles&quot;&#xD;&#xA;if &quot;$(Username)&quot; == &quot;Varna&quot; copy /Y &quot;$(ProjectDir)\plugins&quot; &quot;C:\Users\rylun\AppData\Roaming\r2modmanPlus-local\RiskOfRain2\profiles\DevTest\BepInEx\plugins\123DEVTEST-CoinDropChance&quot;&#xD;&#xA;if &quot;$(Username)&quot; == &quot;Varna&quot; copy /Y &quot;$(ProjectDir)\plugins\assetbundles&quot; &quot;C:\Users\rylun\AppData\Roaming\r2modmanPlus-local\RiskOfRain2\profiles\DevTest\BepInEx\plugins\123DEVTEST-CoinDropChance\assetbundles&quot;" />
+  </Target>
+
+  <ItemGroup>
+    <Compile Remove="CoinDropChance\**" />
+    <Compile Remove="plugins\**" />
+    <Compile Remove="UnityProject\**" />
+    <EmbeddedResource Remove="CoinDropChance\**" />
+    <EmbeddedResource Remove="plugins\**" />
+    <EmbeddedResource Remove="UnityProject\**" />
+    <None Remove="CoinDropChance\**" />
+    <None Remove="plugins\**" />
+    <None Remove="UnityProject\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BepInEx.Core" Version="5.4.19" />
+    <PackageReference Include="R2API" Version="4.1.8" />
+    <PackageReference Include="RiskOfRain2.GameLibs" Version="1.2.2-r.0" />
+    <PackageReference Include="UnityEngine.Modules" Version="2019.4.26" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="MMHOOK_RoR2">
+      <HintPath>..\libs\MMHOOK_RoR2.dll</HintPath>
+    </Reference>
+    <Reference Include="ProperSave">
+      <HintPath>..\libs\ProperSave.dll</HintPath>
+    </Reference>
+    <Reference Include="RiskOfOptions">
+      <HintPath>..\libs\RiskOfOptions.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

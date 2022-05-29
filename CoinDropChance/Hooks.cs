@@ -12,9 +12,6 @@ namespace CoinDropChance
     {
         public static void Init()
         {
-            //main setup hook; this is where most of the mod's settings are applied
-            On.RoR2.Run.Start += Run_Start;
-
             //Coin base drop chance
             On.RoR2.PlayerCharacterMasterController.Awake += PlayerCharacterMasterController_Awake;
 
@@ -22,16 +19,6 @@ namespace CoinDropChance
             BindingFlags allFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance | BindingFlags.DeclaredOnly;
             var initDelegate = typeof(PlayerCharacterMasterController).GetNestedTypes(allFlags)[0].GetMethodCached(name: "<Init>b__72_0");
             MonoMod.RuntimeDetour.HookGen.HookEndpointManager.Modify(initDelegate, (Action<ILContext>)CoinDropHook);
-        }
-
-        private static void Run_Start(On.RoR2.Run.orig_Start orig, Run self)
-        {
-            orig(self);
-
-            Chat.SendBroadcastChat(new Chat.SimpleChatMessage
-            {
-                baseToken = "ExamplePlugin started"
-            });
         }
 
         private static void PlayerCharacterMasterController_Awake(On.RoR2.PlayerCharacterMasterController.orig_Awake orig, PlayerCharacterMasterController self)

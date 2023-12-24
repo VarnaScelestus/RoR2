@@ -13,6 +13,7 @@ namespace EphemeralCoins
         public static ConfigEntry<float> DropChance;
         public static ConfigEntry<float> DropMulti;
         public static ConfigEntry<float> DropMin;
+        public static ConfigEntry<float> DropMax;
         public static ConfigEntry<float> PodCost;
         public static ConfigEntry<float> PortalChance;
         public static ConfigEntry<bool> PortalScale;
@@ -37,6 +38,8 @@ namespace EphemeralCoins
             DropMulti = EphemeralCoins.instance.Config.Bind("2. Enemy and Stage", "Drop Multiplier", 0.90f, new ConfigDescription("The multiplier applied to the drop chance after a coin has dropped. Vanilla is 0.5 (50%)"));
 
             DropMin = EphemeralCoins.instance.Config.Bind("2. Enemy and Stage", "Drop Min Chance", 0.5f, new ConfigDescription("The lowest %chance for enemies to drop coins after DropMulti is applied. Vanilla has no lower limit"));
+
+            DropMax = EphemeralCoins.instance.Config.Bind("2. Enemy and Stage", "Drop Max Chance", 5.0f, new ConfigDescription("The highest %chance for enemies to drop coins after DropMulti is applied. Use if DropMulti > 1"));
 
             PodCost = EphemeralCoins.instance.Config.Bind("2. Enemy and Stage", "Pod Cost", 0f, new ConfigDescription("The cost of Lunar Pods. Vanilla is 1"));
 
@@ -83,8 +86,9 @@ namespace EphemeralCoins
 
                 RiskOfOptionsCompatibility.InvokeAddOptionStepSlider(StartingCoins, 0, 100, 1f, true);
                 RiskOfOptionsCompatibility.InvokeAddOptionStepSlider(DropChance, 0, 100, 0.5f);
-                RiskOfOptionsCompatibility.InvokeAddOptionStepSlider(DropMulti, 0, 1, 0.01f);
+                RiskOfOptionsCompatibility.InvokeAddOptionStepSlider(DropMulti, 0, 2, 0.01f);
                 RiskOfOptionsCompatibility.InvokeAddOptionStepSlider(DropMin, 0, 100, 0.5f);
+                RiskOfOptionsCompatibility.InvokeAddOptionStepSlider(DropMax, 0, 100, 0.5f);
                 RiskOfOptionsCompatibility.InvokeAddOptionStepSlider(PodCost, 0, 10, 1f);
                 RiskOfOptionsCompatibility.InvokeAddOptionStepSlider(PortalChance, 0, 1, 0.01f);
                 RiskOfOptionsCompatibility.InvokeAddOptionCheckBox(PortalScale);
@@ -106,7 +110,7 @@ namespace EphemeralCoins
                     //TODO: put this somewhere where it can update each time a setting is changed
                     //+ "\n\n<style=cSub>"
                     //+ (EnableArtifact.Value ? "< ! > <color=#adf2fa>Artifact of the New Moon</color> is enabled. " + (StartingCoins.Value > 0 && EnableArtifact.Value ? " Start with " + StartingCoins.Value + " coin(s).\n" : "\n") : "")
-                    //+ "< ! > Coins have a " + DropChance.Value + "% drop chance (" + (1 - DropMulti.Value) * 100f + "% falloff per drop, " + DropMin.Value + "% min chance)"
+                    //+ "< ! > Coins have a " + DropChance.Value + "% drop chance (" + DropMulti.Value + "x change per drop, " + DropMin.Value + "% min chance, " + DropMax.Value + "% max chance)"
                     //+ "\n"
                     //+ "< ! > Blue Orbs have a " + PortalChance.Value * 100f + "% chance to appear on stage start" + (PortalScale.Value ? ", divided by the number of times this has occured before." : ".")
                     //+ "\n"

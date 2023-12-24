@@ -134,10 +134,20 @@ namespace EphemeralCoins
             c.Index += 2;
             c.Next.Operand = BepConfig.DropMulti.Value;
             c.Index += 2;
-            c.EmitDelegate<Func<float, float>>((originalChance) =>
-            {
-                return Math.Max(originalChance, BepConfig.DropMin.Value);
-            });
+            if (BepConfig.DropMulti.Value > 1)
+            {    
+                c.EmitDelegate<Func<float, float>>((originalChance) =>
+                {
+                    return Math.Min(originalChance, BepConfig.DropMax.Value);
+                });
+            }
+            else
+            {    
+                c.EmitDelegate<Func<float, float>>((originalChance) =>
+                {
+                    return Math.Max(originalChance, BepConfig.DropMin.Value);
+                });
+            }
         }
         #endregion
 

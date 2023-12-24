@@ -110,7 +110,7 @@ namespace EphemeralCoins
                     //TODO: put this somewhere where it can update each time a setting is changed
                     //+ "\n\n<style=cSub>"
                     //+ (EnableArtifact.Value ? "< ! > <color=#adf2fa>Artifact of the New Moon</color> is enabled. " + (StartingCoins.Value > 0 && EnableArtifact.Value ? " Start with " + StartingCoins.Value + " coin(s).\n" : "\n") : "")
-                    //+ "< ! > Coins have a " + DropChance.Value + "% drop chance (" + (1 - DropMulti.Value) * 100f + "% falloff per drop, " + DropMin.Value + "% min chance)"
+                    //+ "< ! > Coins have a " + DropChance.Value + "% drop chance (" + DropMulti.Value + "x change per drop, " + DropMin.Value + "% min chance, " + DropMax.Value + "% max chance)"
                     //+ "\n"
                     //+ "< ! > Blue Orbs have a " + PortalChance.Value * 100f + "% chance to appear on stage start" + (PortalScale.Value ? ", divided by the number of times this has occured before." : ".")
                     //+ "\n"
